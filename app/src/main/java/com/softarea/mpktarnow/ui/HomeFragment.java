@@ -17,6 +17,7 @@ import com.softarea.mpktarnow.dao.ScheduleDAO;
 import com.softarea.mpktarnow.database.model.BusStopDB;
 import com.softarea.mpktarnow.database.model.ScheduleTokenDB;
 import com.softarea.mpktarnow.utils.DatabaseUtils;
+import com.softarea.mpktarnow.utils.DateUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,6 +36,8 @@ public class HomeFragment extends Fragment {
     scheduleList.setHasFixedSize(true);
     scheduleList.setLayoutManager(new LinearLayoutManager(getActivity()));
     scheduleList.setAdapter(scheduleAdapter);
+
+    Log.i("TEST", DateUtils.min2HHMM(553));
 
     if(DatabaseUtils.getDatabase(getContext()).scheduleTokenDBDAO().getScheduleTokenCount() == 0 ) {
         try {

@@ -11,15 +11,16 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
-import com.softarea.mpktarnow.model.Bus;
+import com.softarea.mpktarnow.model.Departue;
+import com.softarea.mpktarnow.utils.ListUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
 
-  private List<Bus> buses= new ArrayList<>();;
-  private Context context;
+  private List<Departue> departues= new ArrayList<>();;
 
   FragmentActivity activity;
 
@@ -36,8 +37,9 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
     }
   }
 
-  public void updateArticles(List<Bus> busStops) {
-    this.buses.addAll(busStops);
+  public void update(List<Departue> departues) {
+    Collections.sort(departues, new ListUtils.Sortbyroll());
+    this.departues.addAll(departues);
     this.notifyDataSetChanged();
   }
 
@@ -49,7 +51,7 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
   @Override
   public BusAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                   int viewType) {
-    context = parent.getContext();
+    Context context = parent.getContext();
     LayoutInflater layoutInflater = LayoutInflater.from(context);
     View listItem = layoutInflater.inflate(R.layout.item_bus, parent, false);
     return new ViewHolder(listItem);
@@ -57,15 +59,15 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
 
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
-    Bus bus = buses.get(position);
+    Departue departue = departues.get(position);
 
-    holder.busNumber.setText(bus.getNr());
-    holder.busDirection.setText(bus.getDir());
-    holder.busDepartueTime.setText(bus.getS().getT());
+    holder.busNumber.setText(String.valueOf(departue.getBusLine()));
+    holder.busDirection.setText(departue.getBusDirection());
+    holder.busDepartueTime.setText(departue.getTime());
   }
 
   @Override
   public int getItemCount() {
-    return buses.size();
+    return departues.size();
   }
 }
