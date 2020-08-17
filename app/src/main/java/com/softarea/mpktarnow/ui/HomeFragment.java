@@ -5,8 +5,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,15 +29,32 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class HomeFragment extends Fragment {
+  ScheduleAdapter scheduleAdapter;
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
     View root = inflater.inflate(R.layout.fragment_home, container, false);
 
+    setHasOptionsMenu(true);
+
     RecyclerView scheduleList = root.findViewById(R.id.list_schedules);
-    ScheduleAdapter scheduleAdapter = new ScheduleAdapter(getActivity());
+    scheduleAdapter = new ScheduleAdapter(getActivity());
     scheduleList.setHasFixedSize(true);
     scheduleList.setLayoutManager(new LinearLayoutManager(getActivity()));
     scheduleList.setAdapter(scheduleAdapter);
+
+    SearchView searchView = root.findViewById(R.id.search_view);
+    searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+      @Override
+      public boolean onQueryTextSubmit(String query) {
+        return false;
+      }
+      @Override
+      public boolean onQueryTextChange(String newText) {
+        scheduleAdapter.getFilter().filter(newText);
+        return false;
+      }
+    });
 
     Log.i("TEST", DateUtils.min2HHMM(553));
 
