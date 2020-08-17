@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -15,13 +17,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.database.model.BusStopDB;
+import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> {
+public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> implements Filterable {
 
   private List<BusStopDB> busStops = new ArrayList<>();
+  private List<BusStopDB> filteredData = new ArrayList<>();
   private Context context;
   private FragmentActivity activity;
 
@@ -44,6 +48,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
 
   public void updateArticles(List<BusStopDB> busStops) {
     this.busStops.addAll(busStops);
+    this.filteredData.addAll(busStops);
     this.notifyDataSetChanged();
   }
 
@@ -63,7 +68,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
 
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
-    BusStopDB busStop= busStops.get(position);
+    BusStopDB busStop= filteredData.get(position);
     holder.id.setText(String.valueOf(busStop.getId()));
     holder.name.setText(busStop.getName());
     holder.coordsH.setText(String.valueOf(busStop.getHeight()));
@@ -79,6 +84,49 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
 
   @Override
   public int getItemCount() {
-    return busStops.size();
+    return filteredData.size();
   }
+
+  @Override
+  public Filter getFilter() {
+    return exampleFilter;
+  }
+  private Filter exampleFilter = new Filter() {
+    @Override
+    protected FilterResults performFiltering(CharSequence constraint) {
+      List<BusStopDB> filteredList = new ArrayList<>();
+
+      String filterPattern = StringUtils.normalize(constraint.toString().toLowerCase()).trim();
+      String[] arrOfStr = filterPattern.split(" ", 5);
+
+      if (constraint == null || constraint.length() == 0) {
+        filteredList.addAll(busStops);
+      } else {
+
+        for (BusStopDB item : busStops) {
+          boolean status = false;
+          for (String pattern : arrOfStr) {
+            if (StringUtils.normalize(item.getName().toLowerCase()).contains(pattern)) {
+              status = true;
+            } else {
+              status = false;
+              break;
+            }
+          }
+
+        if(status) {
+          filteredList.add(item);
+        }
+        }
+      }
+      FilterResults results = new FilterResults();
+      results.values = filteredList;
+      return results;
+    }
+    @Override
+    protected void publishResults(CharSequence constraint, FilterResults results) {
+      filteredData = (ArrayList<BusStopDB>) results.values;
+      notifyDataSetChanged();
+    }
+  };
 }
