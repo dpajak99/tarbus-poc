@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.BusAdapter;
 import com.softarea.mpktarnow.dao.ScheduleDAO;
-import com.softarea.mpktarnow.model.Schedule;
+import com.softarea.mpktarnow.model.Departues;
 
 import java.io.IOException;
 
@@ -33,15 +33,15 @@ public class BusStopDetailsFragment extends Fragment {
     int id = bundle.getInt("id");
 
     try {
-      ScheduleDAO.DeserializeFromXML(id, new Callback<Schedule>() {
+      ScheduleDAO.DeserializeFromXML(id, new Callback<Departues>() {
         @Override
-        public void onResponse(Call<Schedule> call, Response<Schedule> response) {
-          Schedule schedule = response.body();
-          busAdapter.updateArticles(schedule.getBusStop().getDay().getBuses());
+        public void onResponse(Call<Departues> call, Response<Departues> response) {
+          Departues departues = response.body();
+          busAdapter.update(departues.getDepartueList());
         }
 
         @Override
-        public void onFailure(Call<Schedule> call, Throwable t) {
+        public void onFailure(Call<Departues> call, Throwable t) {
           Log.i("TEST", "DeserializeFromXML - onFailure : " + t.toString());
         }
       });

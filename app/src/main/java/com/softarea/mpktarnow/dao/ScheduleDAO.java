@@ -2,7 +2,7 @@ package com.softarea.mpktarnow.dao;
 
 import android.util.Log;
 
-import com.softarea.mpktarnow.model.Schedule;
+import com.softarea.mpktarnow.model.Departues;
 import com.softarea.mpktarnow.services.BusClient;
 import com.tickaroo.tikxml.TikXml;
 import com.tickaroo.tikxml.retrofit.TikXmlConverterFactory;
@@ -18,7 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 
 public class ScheduleDAO {
-  public static void DeserializeFromXML(int id, Callback<Schedule> callback) throws IOException {
+  public static void DeserializeFromXML(int id, Callback<Departues> callback) throws IOException {
     Log.i("TEST", "DeserializeFromXML - start");
     TikXml tikxml = new TikXml.Builder().exceptionOnUnreadXml(true).build();
 
@@ -30,7 +30,7 @@ public class ScheduleDAO {
 
     BusClient busClient = retrofit.create(BusClient.class);
     Log.i("TEST", "DeserializeFromXML - after retrofit");
-    Call<Schedule> call = busClient.getSchedule(String.valueOf(id) );
+    Call<Departues> call = busClient.getSchedule(String.valueOf(id) );
     Log.i("TEST", "DeserializeFromXML - after first call");
     call.enqueue(callback);
   }
