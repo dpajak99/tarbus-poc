@@ -16,7 +16,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
-import com.softarea.mpktarnow.database.model.BusStopDB;
+import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ import java.util.List;
 
 public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> implements Filterable {
 
-  private List<BusStopDB> busStops = new ArrayList<>();
-  private List<BusStopDB> filteredData = new ArrayList<>();
+  private List<BusStop> busStops = new ArrayList<>();
+  private List<BusStop> filteredData = new ArrayList<>();
   private Context context;
   private FragmentActivity activity;
 
@@ -46,7 +46,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
     }
   }
 
-  public void updateArticles(List<BusStopDB> busStops) {
+  public void updateArticles(List<BusStop> busStops) {
     this.busStops.addAll(busStops);
     this.filteredData.addAll(busStops);
     this.notifyDataSetChanged();
@@ -68,11 +68,11 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
 
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
-    BusStopDB busStop= filteredData.get(position);
+    BusStop busStop= filteredData.get(position);
     holder.id.setText(String.valueOf(busStop.getId()));
     holder.name.setText(busStop.getName());
-    holder.coordsH.setText(String.valueOf(busStop.getHeight()));
-    holder.coordsV.setText(String.valueOf(busStop.getWidth()));
+    holder.coordsH.setText(String.valueOf(busStop.getLatitude()));
+    holder.coordsV.setText(String.valueOf(busStop.getLongitude()));
 
     holder.busStop.setOnClickListener(view -> {
       Bundle result = new Bundle();
@@ -94,7 +94,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
   private Filter exampleFilter = new Filter() {
     @Override
     protected FilterResults performFiltering(CharSequence constraint) {
-      List<BusStopDB> filteredList = new ArrayList<>();
+      List<BusStop> filteredList = new ArrayList<>();
 
       String filterPattern = StringUtils.normalize(constraint.toString().toLowerCase()).trim();
       String[] arrOfStr = filterPattern.split(" ", 5);
@@ -103,7 +103,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
         filteredList.addAll(busStops);
       } else {
 
-        for (BusStopDB item : busStops) {
+        for (BusStop item : busStops) {
           boolean status = false;
           for (String pattern : arrOfStr) {
             if (StringUtils.normalize(item.getName().toLowerCase()).contains(pattern)) {
@@ -125,7 +125,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
     }
     @Override
     protected void publishResults(CharSequence constraint, FilterResults results) {
-      filteredData = (ArrayList<BusStopDB>) results.values;
+      filteredData = (ArrayList<BusStop>) results.values;
       notifyDataSetChanged();
     }
   };

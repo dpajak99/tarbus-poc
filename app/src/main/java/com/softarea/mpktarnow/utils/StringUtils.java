@@ -15,4 +15,9 @@ public class StringUtils {
       .replaceAll("ś", "s")
       .replaceAll("ź", "z")
       .replaceAll("ż", "z");  }
+
+  public static String replaceHTML( String base ) {
+    return Normalizer.normalize(base,
+      Normalizer.Form.NFD)
+      .replaceAll("&lt;", "<");  }
 }

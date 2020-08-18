@@ -1,7 +1,7 @@
 package com.softarea.mpktarnow.ui;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,20 +10,15 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.BusAdapter;
-import com.softarea.mpktarnow.dao.ScheduleDAO;
-import com.softarea.mpktarnow.model.Departues;
-
-import java.io.IOException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.softarea.mpktarnow.dao.MpkDAO;
 
 public class BusStopDetailsFragment extends Fragment {
-  BusAdapter busAdapter;
+  public static BusAdapter busAdapter;
+  private SwipeRefreshLayout mSwipeRefreshLayout;
 
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
@@ -32,22 +27,7 @@ public class BusStopDetailsFragment extends Fragment {
     Bundle bundle = this.getArguments();
     int id = bundle.getInt("id");
 
-    try {
-      ScheduleDAO.DeserializeFromXML(id, new Callback<Departues>() {
-        @Override
-        public void onResponse(Call<Departues> call, Response<Departues> response) {
-          Departues departues = response.body();
-          busAdapter.update(departues.getDepartueList());
-        }
-
-        @Override
-        public void onFailure(Call<Departues> call, Throwable t) {
-          Log.i("TEST", "DeserializeFromXML - onFailure : " + t.toString());
-        }
-      });
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+    MpkDAO.getAndUpdateBusStopDetails(id);
 
     RecyclerView busesList = root.findViewById(R.id.list_buses);
     busAdapter = new BusAdapter( getActivity());
@@ -56,6 +36,18 @@ public class BusStopDetailsFragment extends Fragment {
     busesList.setAdapter(busAdapter);
 
 
+    mSwipeRefreshLayout = root.findViewById(R.id.swiperefresh_items);
+    mSwipeRefreshLayout.setOnRefreshListener(() -> {
+
+      MpkDAO.getAndUpdateBusStopDetails(id);
+
+      final Handler handler = new Handler();
+      handler.postDelayed(() -> {
+        if(mSwipeRefreshLayout.isRefreshing()) {
+          mSwipeRefreshLayout.setRefreshing(false);
+        }
+      }, 1000);
+    });
 
     return root;
   }
