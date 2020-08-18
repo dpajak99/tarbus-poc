@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.model.Departue;
 import com.softarea.mpktarnow.utils.ListUtils;
+import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,6 +44,11 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
     this.notifyDataSetChanged();
   }
 
+  public void clear() {
+    this.departues.clear();
+    this.notifyDataSetChanged();
+  }
+
   public BusAdapter(FragmentActivity activity) {
     this.activity = activity;
   }
@@ -63,7 +69,7 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
 
     holder.busNumber.setText(String.valueOf(departue.getBusLine()));
     holder.busDirection.setText(departue.getBusDirection());
-    holder.busDepartueTime.setText(departue.getTime());
+    holder.busDepartueTime.setText(StringUtils.replaceHTML(departue.getTime()));
   }
 
   @Override
