@@ -6,10 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,7 +35,11 @@ public class HomeFragment extends Fragment {
 
     setHasOptionsMenu(true);
 
-
+    Button button = root.findViewById(R.id.button_map);
+    button.setOnClickListener(view -> {
+      NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
+      navController.navigate(R.id.navigation_map);
+    });
 
 
     RecyclerView scheduleList = root.findViewById(R.id.list_schedules);

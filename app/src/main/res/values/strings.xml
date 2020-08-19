@@ -4,4 +4,5 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_bus_stop_details">Bus Stop Details</string>
+    <string name="title_map">Map</string>
 </resources>
