@@ -3,7 +3,6 @@ package com.softarea.mpktarnow.utils;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.Navigation;
@@ -25,6 +24,7 @@ import com.softarea.mpktarnow.model.MarkerTag;
 import com.softarea.mpktarnow.model.Route;
 import com.softarea.mpktarnow.model.Vehicle;
 import com.softarea.mpktarnow.model.VehiclesList;
+import com.softarea.mpktarnow.services.GoogleMapService;
 import com.softarea.mpktarnow.services.RetrofitJsonClient;
 import com.softarea.mpktarnow.services.RetrofitXmlClient;
 
@@ -40,113 +40,115 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MapUtils {
-  public static void showBusStops(View view, FragmentActivity activity, GoogleMap mMap) {
-    List<BusStop> busStops = DatabaseUtils.getDatabase(activity).dbBusStopDAO().getAll();
-    MapScheduleAdapter mapScheduleAdapter;
+  AtomicBoolean isMarkerInfoOpened = new AtomicBoolean(false);
+  GoogleMapService mapService;
+  GoogleMap map;
+  FragmentActivity activity;
+  Bundle bundle;
 
-    mMap.setOnInfoWindowClickListener(arg0 -> {
-      Bundle result = new Bundle();
-      result.putInt("id", Integer.parseInt(arg0.getTitle()));
-      Navigation.findNavController(view).navigate(R.id.navigation_bus_stop_details, result);
+  public MapUtils( GoogleMapService mapService, Bundle bundle ) {
+    this.mapService = mapService;
+    this.map = mapService.getMap();
+    this.activity = mapService.getActivity();
+    this.bundle = bundle;
+  }
+
+  public void setListeners() {
+    map.setOnInfoWindowClickListener(marker -> {
+      MarkerTag tag = (MarkerTag) marker.getTag();
+      switch (tag.getType()) {
+        case MarkerTag.TYPE_BUSSTOP:
+          BusStop busStop = (BusStop) tag.getObject();
+          Bundle result = new Bundle();
+          result.putInt("id", busStop.getId());
+          Navigation.findNavController(mapService.getView()).navigate(R.id.navigation_bus_stop_details, result);
+          break;
+      }
     });
+
+    mapService.getMap().setOnMarkerClickListener(marker -> {
+      MarkerTag tag = (MarkerTag) marker.getTag();
+      switch (tag.getType()) {
+        case MarkerTag.TYPE_BUSPIN:
+          Vehicle vehicle = (Vehicle) tag.getObject();
+          MapBusAdapter mapBusAdapter = new MapBusAdapter(activity);
+          map.setInfoWindowAdapter(mapBusAdapter);
+
+          mapBusAdapter.setBusDelayInfo(TimeUtils.calcDelayInfo(activity, vehicle.getOdchylenie()));
+          mapBusAdapter.setBusDelayValue(TimeUtils.calcDelayValue(vehicle.getOdchylenie()));
+          mapBusAdapter.setBusDestination(vehicle.getDestination());
+          if ((MathUtils.makePositive(vehicle.getOdchylenie()) / 60) < 4) {
+            mapBusAdapter.setBusDelayColor(R.color.success);
+          } else {
+            mapBusAdapter.setBusDelayColor(R.color.error);
+          }
+
+
+          if (isMarkerInfoOpened.get()) {
+            marker.hideInfoWindow();
+            isMarkerInfoOpened.set(false);
+          } else if (!isMarkerInfoOpened.get()) {
+            marker.showInfoWindow();
+            isMarkerInfoOpened.set(true);
+          }
+          break;
+        case MarkerTag.TYPE_BUSSTOP:
+          BusStop busStop = (BusStop) tag.getObject();
+          MapScheduleAdapter mapScheduleAdapter = new MapScheduleAdapter(activity);
+          map.setInfoWindowAdapter(mapScheduleAdapter);
+          map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
+
+          Call<Departues> call = RetrofitXmlClient.getInstance().getMPKService().getSchedule(String.valueOf(busStop.getId()));
+          call.enqueue(new Callback<Departues>() {
+            @Override
+            public void onResponse(Call<Departues> call, Response<Departues> response) {
+              Departues departues = response.body();
+              mapScheduleAdapter.setDepartues(departues.getDepartueList());
+              mapScheduleAdapter.setBusStopName(busStop.getName());
+
+              marker.showInfoWindow();
+            }
+            @Override
+            public void onFailure(Call<Departues> call, Throwable t) {
+              AlertUtils.alert(activity, activity.getString(R.string.error_download_shedule));
+            }
+          });
+          return true;
+      }
+
+      return true;
+    });
+
+    mapService.getMap().setOnInfoWindowCloseListener(marker -> {
+      isMarkerInfoOpened.set(false);
+    });
+  }
+
+  public void showBusStops() {
+    List<BusStop> busStops = DatabaseUtils.getDatabase(mapService.getActivity()).dbBusStopDAO().getAll();
 
     for (BusStop busStop : busStops) {
       int icon_resource = R.drawable.ic_buspoint;
       if (busStop.getIdCity() != 1) {
         icon_resource = R.drawable.ic_buspoint_yellow;
       }
-      LatLng coords_curr_pos = new LatLng(busStop.getLongitude(), busStop.getLatitude());
 
-      mMap.addMarker(
+      Marker markerBusStop = mapService.getMap().addMarker(
         new MarkerOptions()
-          .position(coords_curr_pos)
-          .title(String.valueOf(busStop.getId()))
+          .position(new LatLng(busStop.getLongitude(), busStop.getLatitude()))
           .icon(BitmapDescriptorFactory.fromResource(icon_resource)));
+      markerBusStop.setTag(new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOP));
     }
 
-    mapScheduleAdapter = new MapScheduleAdapter(activity);
-    mMap.setInfoWindowAdapter(mapScheduleAdapter);
-    mMap.setOnMarkerClickListener(arg0 -> {
-
-      mMap.animateCamera(CameraUpdateFactory.newLatLng(arg0.getPosition()));
-      Call<Departues> call = RetrofitXmlClient.getInstance().getMPKService().getSchedule(arg0.getTitle());
-      call.enqueue(new Callback<Departues>() {
-        @Override
-        public void onResponse(Call<Departues> call, Response<Departues> response) {
-          Departues departues = response.body();
-
-          mapScheduleAdapter.setDepartues(departues.getDepartueList());
-          mapScheduleAdapter.setBusStopName(DatabaseUtils.getDatabase(activity).dbBusStopDAO().getBusStopById(arg0.getTitle()).getName());
-
-          arg0.showInfoWindow();
-        }
-
-        @Override
-        public void onFailure(Call<Departues> call, Throwable t) {
-          Log.i("TEST", "DeserializeFromXML - onFailure : " + t.toString());
-        }
-      });
-      return true;
-    });
   }
 
-  public MapUtils() {
-  }
-
-  public static void showBusDetails(FragmentActivity activity, Bundle bundle, GoogleMap mMap) {
-
-    AtomicBoolean isMarkerInfoOpened = new AtomicBoolean(false);
-    MapBusAdapter mapBusAdapter = new MapBusAdapter(activity);
-    mMap.setInfoWindowAdapter(mapBusAdapter);
-
-    mMap.setOnMarkerClickListener(arg0 -> {
-      MarkerTag tag = (MarkerTag) arg0.getTag();
-      Vehicle vehicle = tag.getVehicle();
-      Log.i("TEST", "TAG: " + tag.getType() + " " + tag.getVehicle().toString());
-
-      int busDeviation = vehicle.getOdchylenie();
-      Log.i("TEST", "getOdchylenie: " + busDeviation);
-      if (busDeviation < 0) {
-        mapBusAdapter.setBusDelayInfo("Aktualne przyśpieszenie");
-        busDeviation *= -1;
-      } else {
-        mapBusAdapter.setBusDelayInfo("Aktualne opóźnienie");
-      }
-
-      if (busDeviation / 60 < 1) {
-        mapBusAdapter.setBusDelayValue(" < 1 min");
-      } else {
-        mapBusAdapter.setBusDelayValue(" " + (int) busDeviation / 60 + " min");
-        if (busDeviation / 60 < 4) {
-          mapBusAdapter.setBusDelayColor(R.color.success);
-        } else {
-          mapBusAdapter.setBusDelayColor(R.color.error);
-        }
-      }
-
-      mapBusAdapter.setBusDestination(vehicle.getCechy2());
-
-      if (tag.getType().contains("busPosition") && isMarkerInfoOpened.get()) {
-        arg0.hideInfoWindow();
-        isMarkerInfoOpened.set(false);
-      } else if (tag.getType().contains("busPosition") && !isMarkerInfoOpened.get()) {
-        arg0.showInfoWindow();
-        isMarkerInfoOpened.set(true);
-      }
-
-      return true;
-    });
-
-    mMap.setOnInfoWindowCloseListener(marker -> {
-      isMarkerInfoOpened.set(false);
-    });
-
-    Marker busPosition = mMap.addMarker(
+  public void showBusDetails() {
+    Marker busPosition = map.addMarker(
       new MarkerOptions()
         .position(new LatLng(50.012458, 20.988236))
         .zIndex(10));
 
-    Marker busDirection = mMap.addMarker(
+    Marker busDirection = map.addMarker(
       new MarkerOptions()
         .position(new LatLng(50.012458, 20.988236))
         .flat(true)
@@ -154,9 +156,7 @@ public class MapUtils {
         .zIndex(10));
 
     ScheduledExecutorService e = Executors.newSingleThreadScheduledExecutor();
-    e.scheduleAtFixedRate(() ->
-
-    {
+    e.scheduleAtFixedRate(() -> {
       List<Vehicle> vehicles = new ArrayList<>();
 
       Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles(String.valueOf(bundle.getInt("busLine")), "", String.valueOf(bundle.getInt("busId")));
@@ -166,7 +166,6 @@ public class MapUtils {
         @Override
         public void onResponse(Call<VehiclesList> call, Response<VehiclesList> response) {
           VehiclesList jsonVehicles = response.body();
-
 
           for (int i = 0; i < jsonVehicles.getJsonVehicles().size(); i++) {
             vehicles.add(MpkDAO.parseJsonToVehicle(jsonVehicles.getJsonVehicles().get(i).getContent()));
@@ -181,11 +180,12 @@ public class MapUtils {
               icon = R.drawable.vh_clock;
             }
 
-            MarkerTag markerTag = new MarkerTag(vehicle, "busPosition");
+            MarkerTag markerTag = new MarkerTag(vehicle, MarkerTag.TYPE_BUSPIN);
             busPosition.setTag(markerTag);
             busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
             busPosition.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
+            markerTag = new MarkerTag(vehicle, MarkerTag.TYPE_BUSCOMPASS);
             busDirection.setIcon(BitmapDescriptorFactory.fromResource(icon));
             busDirection.setRotation(vehicle.getWektor());
             busDirection.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
@@ -206,7 +206,7 @@ public class MapUtils {
     }, 0, 10, TimeUnit.SECONDS);
   }
 
-  public static void showTrack(FragmentActivity activity, Bundle bundle, GoogleMap mMap) {
+  public void showTrack() {
     Route route = DatabaseUtils.getDatabase(activity).dbRoutesDAO().getRouteByBusLine(bundle.getInt("busLine"));
     Call<JsonArray> call = RetrofitJsonClient.getInstance().getMPKService().getTracks(String.valueOf(route.getId()), String.valueOf(bundle.getInt("busLine")), "0");
     call.enqueue(new Callback<JsonArray>() {
@@ -229,16 +229,14 @@ public class MapUtils {
           if (busStop.getIdCity() != 0) {
             icon_resource = R.drawable.ic_buspoint_yellow;
           }
-          LatLng coords_curr_pos = new LatLng(busStop.getLongitude(), busStop.getLatitude());
 
-          mMap.addMarker(
+          Marker markerBusStop = mapService.getMap().addMarker(
             new MarkerOptions()
-              .position(coords_curr_pos)
-              .title(String.valueOf(busStop.getId()))
+              .position(new LatLng(busStop.getLongitude(), busStop.getLatitude()))
               .zIndex(0)
               .icon(BitmapDescriptorFactory.fromResource(icon_resource)));
+          markerBusStop.setTag(new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOP));
         }
-
       }
 
       @Override

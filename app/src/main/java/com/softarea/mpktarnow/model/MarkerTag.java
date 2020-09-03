@@ -1,19 +1,23 @@
 package com.softarea.mpktarnow.model;
 
 public class MarkerTag {
-  private Vehicle vehicle;
-  private String type;
+  public static final int TYPE_BUSSTOP = 0;
+  public static final int TYPE_BUSPIN = 1;
+  public static final int TYPE_BUSCOMPASS = 2;
 
-  public MarkerTag(Vehicle vehicle, String type) {
-    this.vehicle = vehicle;
+  private Object object;
+  private int type;
+
+  public MarkerTag(Object object, int type) {
+    this.object = object;
     this.type = type;
   }
 
-  public Vehicle getVehicle() {
-    return vehicle;
+  public Object getObject() {
+    return object;
   }
 
-  public String getType() {
+  public int getType() {
     return type;
   }
 }

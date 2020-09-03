@@ -14,10 +14,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.softarea.mpktarnow.R;
+import com.softarea.mpktarnow.services.GoogleMapService;
 import com.softarea.mpktarnow.utils.MapUtils;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
-  public static GoogleMap mMap;
   Bundle bundle;
   View root;
 
@@ -39,17 +39,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
   @Override
   public void onMapReady(GoogleMap googleMap) {
-    mMap = googleMap;
-
+    MapUtils mapUtils = new MapUtils(new GoogleMapService(requireActivity(), root, googleMap), bundle);
+    mapUtils.setListeners();
     if (bundle.getString("key").equals("busStopList")) {
-      MapUtils.showBusStops(root, requireActivity(), mMap );
+      mapUtils.showBusStops();
     } else if (bundle.getString("key").equals("busDetails")) {
-      MapUtils.showTrack(requireActivity(), bundle, mMap);
-      MapUtils.showBusDetails(requireActivity(), bundle, mMap);
+      mapUtils.showTrack();
+      mapUtils.showBusDetails();
     }
 
     LatLng coords_tarnow = new LatLng(50.012458, 20.988236);
-    mMap.moveCamera(CameraUpdateFactory.newLatLng(coords_tarnow));
+    googleMap.moveCamera(CameraUpdateFactory.newLatLng(coords_tarnow));
   }
 
 

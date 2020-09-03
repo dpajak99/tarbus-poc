@@ -26,11 +26,11 @@ public class Vehicle {
   int ileSekDoOdjazdu;
   String typPojazdu;
   String cechy1;
-  String cechy2;
+  String destination;
   String cechy3;
   int wektor;
 
-  public Vehicle(int nrRadia, int nb, String numerLini, String warTrasy, String kierunek, int idKursu, int lpPrzyst, int drogaPlan, int drogaWyko, double dlugosc, double szerokosc, double prevDlugosc, double prevSzerokosc, int odchylenie, String odchylenieStr, int stan, String planGodzRozp, int nastIdKursu, String nastPlanGodzRozp, String nastNumLini, String nastWarTrasy, String nastKierunek, int ileSekDoOdjazdu, String typPojazdu, String cechy1, String cechy2, String cechy3, int wektor) {
+  public Vehicle(int nrRadia, int nb, String numerLini, String warTrasy, String kierunek, int idKursu, int lpPrzyst, int drogaPlan, int drogaWyko, double dlugosc, double szerokosc, double prevDlugosc, double prevSzerokosc, int odchylenie, String odchylenieStr, int stan, String planGodzRozp, int nastIdKursu, String nastPlanGodzRozp, String nastNumLini, String nastWarTrasy, String nastKierunek, int ileSekDoOdjazdu, String typPojazdu, String cechy1, String destination, String cechy3, int wektor) {
     this.nrRadia = nrRadia;
     this.nb = nb;
     this.numerLini = numerLini;
@@ -56,7 +56,7 @@ public class Vehicle {
     this.ileSekDoOdjazdu = ileSekDoOdjazdu;
     this.typPojazdu = typPojazdu;
     this.cechy1 = cechy1;
-    this.cechy2 = cechy2;
+    this.destination = destination;
     this.cechy3 = cechy3;
     this.wektor = wektor;
   }
@@ -92,7 +92,7 @@ public class Vehicle {
       ", ileSekDoOdjazdu=" + ileSekDoOdjazdu +
       ", typPojazdu='" + typPojazdu + '\'' +
       ", cechy1='" + cechy1 + '\'' +
-      ", cechy2='" + cechy2 + '\'' +
+      ", cechy2='" + destination + '\'' +
       ", cechy3='" + cechy3 + '\'' +
       ", wektor=" + wektor +
       '}';
@@ -198,8 +198,8 @@ public class Vehicle {
     return cechy1;
   }
 
-  public String getCechy2() {
-    return cechy2;
+  public String getDestination() {
+    return destination;
   }
 
   public String getCechy3() {

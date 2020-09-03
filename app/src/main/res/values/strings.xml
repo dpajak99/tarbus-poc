@@ -5,4 +5,9 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_bus_stop_details">Bus Stop Details</string>
     <string name="title_map">Map</string>
+    
+    <string name="current_delay">Aktualne opóźnienie</string>
+    <string name="current_acceleration">Aktualne przyśpieszenie</string>
+
+    <string name="error_download_shedule">Wystąpił błąd podczas pobierania najbliższych odjazdów z przystanku</string>
 </resources>
