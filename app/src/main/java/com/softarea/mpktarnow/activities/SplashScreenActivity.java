@@ -20,7 +20,6 @@ public class SplashScreenActivity extends AppCompatActivity {
     ImageView logoView = findViewById(R.id.logo);
     AnimationUtils.createPulsarLogo(logoView);
 
-
     final Handler handler = new Handler();
     handler.postDelayed(() -> {
       Intent intent = new Intent(getApplicationContext(), MainActivity.class);

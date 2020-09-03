@@ -28,4 +28,10 @@
         android:name="com.softarea.mpktarnow.ui.BusStopDetailsFragment"
         android:label="@string/title_bus_stop_details"
         tools:layout="@layout/fragment_bus_stop_details" />
+
+    <fragment
+        android:id="@+id/navigation_map"
+        android:name="com.softarea.mpktarnow.ui.MapFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_map" />
 </navigation>

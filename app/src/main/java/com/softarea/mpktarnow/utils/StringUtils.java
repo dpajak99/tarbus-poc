@@ -3,7 +3,7 @@ package com.softarea.mpktarnow.utils;
 import java.text.Normalizer;
 
 public class StringUtils {
-  public static String normalize( String base ) {
+  public static String normalize(String base) {
     return Normalizer.normalize(base,
       Normalizer.Form.NFD)
       .replaceAll("ą", "a")
@@ -14,10 +14,30 @@ public class StringUtils {
       .replaceAll("ó", "o")
       .replaceAll("ś", "s")
       .replaceAll("ź", "z")
-      .replaceAll("ż", "z");  }
+      .replaceAll("ż", "z");
+  }
 
-  public static String replaceHTML( String base ) {
+  public static String replaceHTML(String base) {
     return Normalizer.normalize(base,
       Normalizer.Form.NFD)
-      .replaceAll("&lt;", "<");  }
+      .replaceAll("&lt;", "<");
+  }
+
+  public static String join(Object... values) {
+    StringBuilder sb = new StringBuilder("");
+    for (int i = 0; i < values.length; i++) {
+      sb.append(values[i]);
+    }
+    return sb.toString();
+  }
+
+  public static String deleteWhiteSpaces( String text ) {
+    StringBuilder result = new StringBuilder("");
+    for( int i = 0; i < text.length(); i++ ) {
+      if( text.charAt(i) != ' ' ) {
+        result.append(text.charAt(i));
+      }
+    }
+    return result.toString();
+  }
 }
