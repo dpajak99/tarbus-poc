@@ -8,7 +8,7 @@ public class Departue {
   @Attribute(name = "i")
   int id;
   @Attribute(name = "di")
-  int routeId;
+  int wariantId;
   @Attribute(name = "n")
   int busId;
   @Attribute(name = "t")
@@ -35,9 +35,9 @@ public class Departue {
   public Departue() {
   }
 
-  public Departue(int id, int routeId, int busId, int t, int busLine, String busDirection, String dd, String p, String kn, int remainingTime, int m, String time, String vn) {
+  public Departue(int id, int wariantId, int busId, int t, int busLine, String busDirection, String dd, String p, String kn, int remainingTime, int m, String time, String vn) {
     this.id = id;
-    this.routeId = routeId;
+    this.wariantId = wariantId;
     this.busId = busId;
     this.t = t;
     this.busLine = busLine;
@@ -55,8 +55,8 @@ public class Departue {
     return id;
   }
 
-  public int getRouteId() {
-    return routeId;
+  public int getWariantId() {
+    return wariantId;
   }
 
   public int getBusId() {
@@ -107,7 +107,7 @@ public class Departue {
   public String toString() {
     return "Departue{" +
       "id=" + id +
-      ", departueId=" + routeId +
+      ", departueId=" + wariantId +
       ", n=" + busId +
       ", t=" + t +
       ", busLine=" + busLine +

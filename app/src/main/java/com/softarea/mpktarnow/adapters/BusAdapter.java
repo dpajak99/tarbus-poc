@@ -80,6 +80,7 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
       result.putString("key", "busDetails");
       result.putInt("busLine", departue.getBusLine());
       result.putInt("busId", departue.getBusId());
+      result.putInt("wariantId", departue.getWariantId());
       result.putString("routeId", String.valueOf(departue.getId()));
       Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
     });
