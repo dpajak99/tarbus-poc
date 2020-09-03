@@ -1,7 +1,6 @@
 package com.softarea.mpktarnow.utils;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -11,22 +10,25 @@ import androidx.navigation.Navigation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.MapBusAdapter;
 import com.softarea.mpktarnow.adapters.MapScheduleAdapter;
+import com.softarea.mpktarnow.dao.BusStopDAO;
 import com.softarea.mpktarnow.dao.MpkDAO;
+import com.softarea.mpktarnow.dao.RouteDAO;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.Departues;
 import com.softarea.mpktarnow.model.MarkerTag;
 import com.softarea.mpktarnow.model.Route;
 import com.softarea.mpktarnow.model.RouteHolder;
-import com.softarea.mpktarnow.model.RoutePoint;
 import com.softarea.mpktarnow.model.RouteWariant;
 import com.softarea.mpktarnow.model.Vehicle;
 import com.softarea.mpktarnow.model.VehiclesList;
@@ -162,6 +164,8 @@ public class MapUtils {
         .anchor(0.5f, 0.5f)
         .zIndex(10));
 
+    List<Boolean> cameraStatus = new ArrayList<>();
+    cameraStatus.add(true);
     ScheduledExecutorService e = Executors.newSingleThreadScheduledExecutor();
     e.scheduleAtFixedRate(() -> {
       List<Vehicle> vehicles = new ArrayList<>();
@@ -200,7 +204,11 @@ public class MapUtils {
             if (isMarkerInfoOpened.get()) {
               busPosition.showInfoWindow();
             }
-            //mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc())));
+            if(cameraStatus.get(0)) {
+              map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc())));
+              cameraStatus.clear();
+              cameraStatus.add(false);
+            }
           }
 
         }
@@ -220,99 +228,40 @@ public class MapUtils {
       @Override
       public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
         JsonArray jsonArray = response.body();
-        JsonArray array = jsonArray.get(0).getAsJsonArray();
-        List<BusStop> busStops = new ArrayList<>();
-
-        for (int i = 0; i < array.size(); i++) {
-          JsonArray busArray = array.get(i).getAsJsonArray();
-          BusStop busStop = new BusStop(
-            busArray.get(0).getAsInt(),
-            busArray.get(1).getAsString(),
-            busArray.get(2).getAsString(),
-            busArray.get(3).getAsDouble(),
-            busArray.get(4).getAsDouble(),
-            busArray.get(5).getAsInt()
-          );
-          busStops.add(busStop);
-        }
-
-
-        JsonArray route = jsonArray.get(2).getAsJsonArray();
-        double tmp = 0;
-        List<RouteHolder> routeHolders = new ArrayList<>();
-        for (int i = 0; i < route.size(); i++) {
-          List<RoutePoint> routePoints = new ArrayList<>();
-          JsonArray routeElement = route.get(i).getAsJsonArray();
-          JsonArray routeJsonPoints = routeElement.get(3).getAsJsonArray();
-
-          for (int j = 0; j < routeJsonPoints.size(); j++) {
-            if (j % 2 == 0) {
-              tmp = routeJsonPoints.get(j).getAsDouble();
-            } else {
-              routePoints.add(new RoutePoint(tmp, routeJsonPoints.get(j).getAsDouble()));
-            }
-          }
-          routeHolders.add(new RouteHolder(routeElement.get(0).getAsInt(), routeElement.get(1).getAsInt(), routeElement.get(2).getAsInt(), routePoints));
-        }
-
-        JsonArray jsonRouteWariants = jsonArray.get(3).getAsJsonArray();
-        List<RouteWariant> routeWariants = new ArrayList<>();
-        for (int i = 0; i < jsonRouteWariants.size(); i++) {
-          JsonArray jsonElements = jsonRouteWariants.get(i).getAsJsonArray();
-          List<Integer> busOnTrack = new ArrayList<>();
-          List<Integer> pointsOnTrack = new ArrayList<>();
-          JsonArray jsonTrack = jsonElements.get(6).getAsJsonArray();
-          JsonArray jsonBusOnTrack = jsonTrack.get(0).getAsJsonArray();
-          JsonArray jsonPointsOnTrack = jsonTrack.get(1).getAsJsonArray();
-
-          for (int j = 0; j < jsonBusOnTrack.size(); j++) {
-            busOnTrack.add(jsonBusOnTrack.get(j).getAsInt());
-          }
-          for (int j = 0; j < jsonPointsOnTrack.size(); j++) {
-            pointsOnTrack.add(jsonPointsOnTrack.get(j).getAsInt());
-          }
-
-          routeWariants.add(new RouteWariant(
-            jsonElements.get(0).getAsInt(),
-            jsonElements.get(0).getAsInt(),
-            jsonElements.get(0).getAsInt(),
-            jsonElements.get(0).getAsString(),
-            jsonElements.get(0).getAsString(),
-            jsonElements.get(0).getAsString(),
-            busOnTrack,
-            pointsOnTrack,
-            jsonElements.get(0).getAsInt(),
-            jsonElements.get(0).getAsString(),
-            jsonElements.get(0).getAsInt()
-          ));
-        }
+        List<BusStop> busStops = BusStopDAO.parseRouteBusStops(jsonArray.get(0).getAsJsonArray());
+        List<RouteHolder> routeHolders = RouteDAO.parsePolylines(jsonArray.get(2).getAsJsonArray());
+        List<RouteWariant> routeWariants = RouteDAO.parseRouteWariants(jsonArray.get(3).getAsJsonArray());
 
         for (RouteWariant routeWariant : routeWariants) {
-
           if (routeWariant.getWariantId() == bundle.getInt("wariantId")) {
-            for (int i = 0; i < routeWariant.getBusOnTrack().size(); i++) {
-
+            for (int i = 0; i < routeWariant.getPointsOnTrack().size(); i++) {
+              int trackColor = R.color.color_city;
               BusStop busStop = busStops.get(routeWariant.getBusOnTrack().get(i));
               int icon_resource = R.drawable.ic_buspoint;
               if (busStop.getIdCity() != 0) {
                 icon_resource = R.drawable.ic_buspoint_yellow;
+                trackColor = R.color.color_zone;
               }
-
               Marker markerBusStop = mapService.getMap().addMarker(
                 new MarkerOptions()
                   .position(new LatLng(busStop.getLongitude(), busStop.getLatitude()))
                   .zIndex(0)
+                  .anchor(0.5f, 0.5f)
                   .icon(BitmapDescriptorFactory.fromResource(icon_resource)));
               markerBusStop.setTag(new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOP));
-            }
-            for (int i = 0; i < routeWariant.getPointsOnTrack().size(); i++) {
-              RouteHolder routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
-              for (int j = 0; j < routeHolder.getPoints().size(); j++) {
-                if (j < routeHolder.getPoints().size() - 1) {
-                  Polyline line = map.addPolyline(new PolylineOptions()
-                    .add(routeHolder.getPoints().get(j + 1).getCoords(), routeHolder.getPoints().get(j).getCoords())
-                    .width(5)
-                    .color(Color.RED));
+
+              if (i < routeWariant.getPointsOnTrack().size() - 1) {
+                RouteHolder routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
+                for (int j = 0; j < routeHolder.getPoints().size(); j++) {
+                  if (j < routeHolder.getPoints().size() - 1) {
+                    Polyline line = map.addPolyline(new PolylineOptions()
+                      .add(routeHolder.getPoints().get(j + 1).getCoords(), routeHolder.getPoints().get(j).getCoords())
+                      .width(15)
+                      .geodesic(true)
+                      .startCap(new RoundCap())
+                      .jointType(JointType.ROUND)
+                      .color(activity.getColor(trackColor)));
+                  }
                 }
               }
             }
