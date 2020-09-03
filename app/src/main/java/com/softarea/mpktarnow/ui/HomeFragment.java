@@ -37,8 +37,11 @@ public class HomeFragment extends Fragment {
 
     Button button = root.findViewById(R.id.button_map);
     button.setOnClickListener(view -> {
+      Bundle result = new Bundle();
+      result.putString("key", "busStopList");
+
       NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment);
-      navController.navigate(R.id.navigation_map);
+      navController.navigate(R.id.navigation_map, result);
     });
 
 

@@ -3,18 +3,22 @@ package com.softarea.mpktarnow.dao;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.Marker;
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.database.AppDatabase;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.City;
 import com.softarea.mpktarnow.model.Departues;
+import com.softarea.mpktarnow.model.Vehicle;
 import com.softarea.mpktarnow.services.RetrofitJsonClient;
 import com.softarea.mpktarnow.services.RetrofitXmlClient;
 import com.softarea.mpktarnow.ui.BusStopDetailsFragment;
 import com.softarea.mpktarnow.ui.HomeFragment;
 import com.softarea.mpktarnow.utils.DatabaseUtils;
 
-import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.util.List;
 
 import retrofit2.Call;
@@ -38,6 +42,10 @@ public class MpkDAO {
         Log.i("TEST", "DeserializeFromXML - onFailure : " + t.toString());
       }
     });
+  }
+
+  public static void getAndUpdateMapBusStopDetails(Marker marker, int id) {
+
   }
 
   public static void getAndSaveCities(Context context) {
@@ -109,5 +117,48 @@ public class MpkDAO {
         Log.i("TEST", "DeserializeFromJSON - onFailure" + t.toString());
       }
     });
+  }
+
+  public static Vehicle parseJsonToVehicle(String jsonVehicles) {
+    JSONArray jsonArray = null;
+    Vehicle vehicle = new Vehicle();
+    try {
+      jsonArray = new JSONArray(jsonVehicles);
+
+      vehicle = new Vehicle(
+        jsonArray.getInt(0),
+        jsonArray.getInt(1),
+        jsonArray.getString(2),
+        jsonArray.getString(3),
+        jsonArray.getString(4),
+        jsonArray.getInt(5),
+        jsonArray.getInt(6),
+        jsonArray.getInt(7),
+        jsonArray.getInt(8),
+        jsonArray.getDouble(9),
+        jsonArray.getDouble(10),
+        jsonArray.getDouble(11),
+        jsonArray.getDouble(12),
+        jsonArray.getInt(13),
+        jsonArray.getString(14),
+        jsonArray.getInt(15),
+        jsonArray.getString(16),
+        jsonArray.getInt(17),
+        jsonArray.getString(18),
+        jsonArray.getString(19),
+        jsonArray.getString(20),
+        jsonArray.getString(21),
+        jsonArray.getInt(22),
+        jsonArray.getString(23),
+        jsonArray.getString(24),
+        jsonArray.getString(25),
+        jsonArray.getString(26),
+        jsonArray.getInt(27)
+      );
+    } catch (JSONException e1) {
+      e1.printStackTrace();
+    }
+
+    return vehicle;
   }
 }

@@ -16,6 +16,9 @@ public interface DbBusStopDAO {
   @Query("SELECT * FROM BusStop WHERE id = :id")
   BusStop getBusStopById(int id);
 
+  @Query("SELECT * FROM BusStop WHERE id = :id")
+  BusStop getBusStopById(String id);
+
   @Query("UPDATE BusStop SET latitude = :latitude, longitude = :longitude WHERE id = :id")
   void updateCoords(String latitude, String longitude, int  id);
 

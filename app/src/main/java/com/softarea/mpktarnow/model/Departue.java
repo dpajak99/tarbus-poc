@@ -10,7 +10,7 @@ public class Departue {
   @Attribute(name = "di")
   int departueId;
   @Attribute(name = "n")
-  int n;
+  int busId;
   @Attribute(name = "t")
   int t;  /* JAKIŚ CZAS */
   @Attribute(name = "r")
@@ -35,6 +35,22 @@ public class Departue {
   public Departue() {
   }
 
+  public Departue(int id, int departueId, int busId, int t, int busLine, String busDirection, String dd, String p, String kn, int remainingTime, int m, String time, String vn) {
+    this.id = id;
+    this.departueId = departueId;
+    this.busId = busId;
+    this.t = t;
+    this.busLine = busLine;
+    this.busDirection = busDirection;
+    this.dd = dd;
+    this.p = p;
+    this.kn = kn;
+    this.remainingTime = remainingTime;
+    this.m = m;
+    this.time = time;
+    this.vn = vn;
+  }
+
   public int getId() {
     return id;
   }
@@ -43,8 +59,8 @@ public class Departue {
     return departueId;
   }
 
-  public int getN() {
-    return n;
+  public int getBusId() {
+    return busId;
   }
 
   public int getT() {
@@ -85,5 +101,24 @@ public class Departue {
 
   public String getVn() {
     return vn;
+  }
+
+  @Override
+  public String toString() {
+    return "Departue{" +
+      "id=" + id +
+      ", departueId=" + departueId +
+      ", n=" + busId +
+      ", t=" + t +
+      ", busLine=" + busLine +
+      ", busDirection='" + busDirection + '\'' +
+      ", dd='" + dd + '\'' +
+      ", p='" + p + '\'' +
+      ", kn='" + kn + '\'' +
+      ", remainingTime=" + remainingTime +
+      ", m=" + m +
+      ", time='" + time + '\'' +
+      ", vn='" + vn + '\'' +
+      '}';
   }
 }
