@@ -22,6 +22,7 @@ import com.softarea.mpktarnow.dao.MpkDAO;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.Departues;
 import com.softarea.mpktarnow.model.MarkerTag;
+import com.softarea.mpktarnow.model.Route;
 import com.softarea.mpktarnow.model.Vehicle;
 import com.softarea.mpktarnow.model.VehiclesList;
 import com.softarea.mpktarnow.services.RetrofitJsonClient;
@@ -54,7 +55,7 @@ public class MapUtils {
       if (busStop.getIdCity() != 1) {
         icon_resource = R.drawable.ic_buspoint_yellow;
       }
-      LatLng coords_curr_pos = new LatLng(Double.parseDouble(busStop.getLongitude()), Double.parseDouble(busStop.getLatitude()));
+      LatLng coords_curr_pos = new LatLng(busStop.getLongitude(), busStop.getLatitude());
 
       mMap.addMarker(
         new MarkerOptions()
@@ -105,18 +106,18 @@ public class MapUtils {
 
       int busDeviation = vehicle.getOdchylenie();
       Log.i("TEST", "getOdchylenie: " + busDeviation);
-      if( busDeviation < 0 ) {
+      if (busDeviation < 0) {
         mapBusAdapter.setBusDelayInfo("Aktualne przyśpieszenie");
         busDeviation *= -1;
       } else {
         mapBusAdapter.setBusDelayInfo("Aktualne opóźnienie");
       }
 
-      if( busDeviation / 60 < 1) {
+      if (busDeviation / 60 < 1) {
         mapBusAdapter.setBusDelayValue(" < 1 min");
       } else {
         mapBusAdapter.setBusDelayValue(" " + (int) busDeviation / 60 + " min");
-        if( busDeviation / 60 < 4 ) {
+        if (busDeviation / 60 < 4) {
           mapBusAdapter.setBusDelayColor(R.color.success);
         } else {
           mapBusAdapter.setBusDelayColor(R.color.error);
@@ -128,7 +129,7 @@ public class MapUtils {
       if (tag.getType().contains("busPosition") && isMarkerInfoOpened.get()) {
         arg0.hideInfoWindow();
         isMarkerInfoOpened.set(false);
-      } else if(tag.getType().contains("busPosition") && !isMarkerInfoOpened.get()){
+      } else if (tag.getType().contains("busPosition") && !isMarkerInfoOpened.get()) {
         arg0.showInfoWindow();
         isMarkerInfoOpened.set(true);
       }
@@ -139,6 +140,18 @@ public class MapUtils {
     mMap.setOnInfoWindowCloseListener(marker -> {
       isMarkerInfoOpened.set(false);
     });
+
+    Marker busPosition = mMap.addMarker(
+      new MarkerOptions()
+        .position(new LatLng(50.012458, 20.988236))
+        .zIndex(10));
+
+    Marker busDirection = mMap.addMarker(
+      new MarkerOptions()
+        .position(new LatLng(50.012458, 20.988236))
+        .flat(true)
+        .anchor(0.5f, 0.5f)
+        .zIndex(10));
 
     ScheduledExecutorService e = Executors.newSingleThreadScheduledExecutor();
     e.scheduleAtFixedRate(() ->
@@ -153,7 +166,7 @@ public class MapUtils {
         @Override
         public void onResponse(Call<VehiclesList> call, Response<VehiclesList> response) {
           VehiclesList jsonVehicles = response.body();
-          mMap.clear();
+
 
           for (int i = 0; i < jsonVehicles.getJsonVehicles().size(); i++) {
             vehicles.add(MpkDAO.parseJsonToVehicle(jsonVehicles.getJsonVehicles().get(i).getContent()));
@@ -161,27 +174,21 @@ public class MapUtils {
 
             Bitmap bitmap;
             int icon = R.drawable.vh_arrow;
-            if(!vehicle.getNumerLini().equals("")) {
+            if (!vehicle.getNumerLini().equals("")) {
               bitmap = ImageUtils.createBusPinImage(activity, vehicle.getNumerLini());
             } else {
               bitmap = ImageUtils.createLongBusPinImage(activity, vehicle.getNastNumLini(), String.valueOf(vehicle.getIleSekDoOdjazdu()));
               icon = R.drawable.vh_clock;
             }
-            Marker busPosition = mMap.addMarker(
-              new MarkerOptions()
-                .position(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()))
-                .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
 
-            Marker busDirection = mMap.addMarker(
-              new MarkerOptions()
-                .position(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()))
-                .flat(true)
-                .anchor(0.5f, 0.5f)
-                .rotation(vehicle.getWektor())
-                .icon(BitmapDescriptorFactory.fromResource(icon)));
             MarkerTag markerTag = new MarkerTag(vehicle, "busPosition");
             busPosition.setTag(markerTag);
+            busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
+            busPosition.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
+            busDirection.setIcon(BitmapDescriptorFactory.fromResource(icon));
+            busDirection.setRotation(vehicle.getWektor());
+            busDirection.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
             if (isMarkerInfoOpened.get()) {
               busPosition.showInfoWindow();
@@ -199,13 +206,38 @@ public class MapUtils {
     }, 0, 10, TimeUnit.SECONDS);
   }
 
-  public static void showTrack(FragmentActivity activity, Bundle bundle, GoogleMap mMap)  {
-    Call<JsonArray> call = RetrofitJsonClient.getInstance().getMPKService().getTracks(bundle.getString("routeId"), "0", "0");
+  public static void showTrack(FragmentActivity activity, Bundle bundle, GoogleMap mMap) {
+    Route route = DatabaseUtils.getDatabase(activity).dbRoutesDAO().getRouteByBusLine(bundle.getInt("busLine"));
+    Call<JsonArray> call = RetrofitJsonClient.getInstance().getMPKService().getTracks(String.valueOf(route.getId()), String.valueOf(bundle.getInt("busLine")), "0");
     call.enqueue(new Callback<JsonArray>() {
       @Override
       public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
         JsonArray jsonArray = response.body();
-        Log.i("TEST", jsonArray.toString());
+        JsonArray array = jsonArray.get(0).getAsJsonArray();
+
+        for (int i = 0; i < array.size(); i++) {
+          JsonArray busArray = array.get(i).getAsJsonArray();
+          BusStop busStop = new BusStop(
+            busArray.get(0).getAsInt(),
+            busArray.get(1).getAsString(),
+            busArray.get(2).getAsString(),
+            busArray.get(3).getAsDouble(),
+            busArray.get(4).getAsDouble(),
+            busArray.get(5).getAsInt()
+          );
+          int icon_resource = R.drawable.ic_buspoint;
+          if (busStop.getIdCity() != 0) {
+            icon_resource = R.drawable.ic_buspoint_yellow;
+          }
+          LatLng coords_curr_pos = new LatLng(busStop.getLongitude(), busStop.getLatitude());
+
+          mMap.addMarker(
+            new MarkerOptions()
+              .position(coords_curr_pos)
+              .title(String.valueOf(busStop.getId()))
+              .zIndex(0)
+              .icon(BitmapDescriptorFactory.fromResource(icon_resource)));
+        }
 
       }
 

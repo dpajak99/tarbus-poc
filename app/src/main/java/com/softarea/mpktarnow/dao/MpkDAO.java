@@ -9,6 +9,7 @@ import com.softarea.mpktarnow.database.AppDatabase;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.City;
 import com.softarea.mpktarnow.model.Departues;
+import com.softarea.mpktarnow.model.Route;
 import com.softarea.mpktarnow.model.Vehicle;
 import com.softarea.mpktarnow.services.RetrofitJsonClient;
 import com.softarea.mpktarnow.services.RetrofitXmlClient;
@@ -75,7 +76,7 @@ public class MpkDAO {
             int busTimeTable = jBusStop.get(4).getAsInt();
             String busShowNum = jBusStop.get(5).getAsString();
 
-            db.dbBusStopDAO().insert(new BusStop(busId, cityId, "", "", busName, busNumber, busZone, busTimeTable, busShowNum));
+            db.dbBusStopDAO().insert(new BusStop(busId, cityId, 0, 0, busName, busNumber, busZone, busTimeTable, busShowNum));
           }
         }
         getAndSaveBusStopsCoords(context);
@@ -100,13 +101,41 @@ public class MpkDAO {
           String latitude = jBusStops.get(4).getAsString();
           String longitude = jBusStops.get(5).getAsString();
 
-          Log.i("TEST", jBusStops.get(4).getAsString() + " - " + jBusStops.get(5).getAsString());
-
           DatabaseUtils.getDatabase(context).dbBusStopDAO().updateCoords( latitude, longitude, id );
 
           if( i == array.size() - 1 ) {
             List<BusStop> busStops = DatabaseUtils.getDatabase(context).dbBusStopDAO().getAll();
             HomeFragment.scheduleAdapter.updateArticles(busStops);
+            getAndSaveRouteList(context);
+          }
+        }
+      }
+
+      @Override
+      public void onFailure(Call<JsonArray> call, Throwable t) {
+        Log.i("TEST", "DeserializeFromJSON - onFailure" + t.toString());
+      }
+    });
+  }
+
+  public static void getAndSaveRouteList(Context context) {
+    Call<JsonArray> call = RetrofitJsonClient.getInstance().getMPKService().getRouteList();
+    call.enqueue(new Callback<JsonArray>() {
+      @Override
+      public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
+        JsonArray jsonarray = response.body();
+        int tmp = 0;
+        JsonArray array = jsonarray.get(0).getAsJsonArray();
+        for (int i = 0; i < array.size(); i++) {
+          if( i % 2 == 0 ) {
+            tmp = array.get(i).getAsInt();
+          } else {
+            Route route = new Route(tmp, array.get(i).getAsInt());
+            DatabaseUtils.getDatabase(context).dbRoutesDAO().insert( route );
+            Log.i("TEST", route.toString());
+          }
+
+          if( i == array.size() - 1 ) {
             HomeFragment.pd.hide();
           }
         }

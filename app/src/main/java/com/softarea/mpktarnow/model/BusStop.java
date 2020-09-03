@@ -2,6 +2,7 @@ package com.softarea.mpktarnow.model;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "BusStop")
@@ -11,9 +12,9 @@ public class BusStop {
   @ColumnInfo(name = "idCity")
   int idCity;
   @ColumnInfo(name = "latitude")
-  String latitude;
+  double latitude;
   @ColumnInfo(name = "longitude")
-  String longitude;
+  double longitude;
   @ColumnInfo(name = "name")
   String name;
   @ColumnInfo(name = "number")
@@ -25,7 +26,7 @@ public class BusStop {
   @ColumnInfo(name = "showNum")
   String showNum;
 
-  public BusStop(int id, int idCity, String latitude, String longitude, String name, String number, int zone, int timetableType, String showNum) {
+  public BusStop(int id, int idCity, double latitude, double longitude, String name, String number, int zone, int timetableType, String showNum) {
     this.id = id;
     this.idCity = idCity;
     this.latitude = latitude;
@@ -35,6 +36,16 @@ public class BusStop {
     this.zone = zone;
     this.timetableType = timetableType;
     this.showNum = showNum;
+  }
+
+  @Ignore
+  public BusStop(int id, String name, String number, double latitude, double longitude, int idCity) {
+    this.id = id;
+    this.idCity = idCity;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.name = name;
+    this.number = number;
   }
 
   @Override
@@ -60,11 +71,11 @@ public class BusStop {
     return idCity;
   }
 
-  public String getLatitude() {
+  public double getLatitude() {
     return latitude;
   }
 
-  public String getLongitude() {
+  public double getLongitude() {
     return longitude;
   }
 
