@@ -170,47 +170,53 @@ public class MapUtils {
     e.scheduleAtFixedRate(() -> {
       List<Vehicle> vehicles = new ArrayList<>();
 
-      Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles(String.valueOf(bundle.getInt("busLine")), "", String.valueOf(bundle.getInt("busId")));
+      String busId = String.valueOf(bundle.getInt("busId"));
+      if (busId.equals("0")) {
+        busId = "";
+      }
+      Log.i("TEST", "busId = " + busId);
+      Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles(String.valueOf(bundle.getInt("busLine")), "", busId);
       //Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles("", "", "");
       //Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles("9", "", "");
       call.enqueue(new Callback<VehiclesList>() {
         @Override
         public void onResponse(Call<VehiclesList> call, Response<VehiclesList> response) {
-          VehiclesList jsonVehicles = response.body();
+          if (!response.headers().get("content-length").equals("15")) {
+            VehiclesList jsonVehicles = response.body();
+            Log.i("TEST", "okej2 + " + response.toString());
+            for (int i = 0; i < jsonVehicles.getJsonVehicles().size(); i++) {
+              vehicles.add(MpkDAO.parseJsonToVehicle(jsonVehicles.getJsonVehicles().get(i).getContent()));
+              Vehicle vehicle = vehicles.get(i);
 
-          for (int i = 0; i < jsonVehicles.getJsonVehicles().size(); i++) {
-            vehicles.add(MpkDAO.parseJsonToVehicle(jsonVehicles.getJsonVehicles().get(i).getContent()));
-            Vehicle vehicle = vehicles.get(i);
+              Bitmap bitmap;
+              int icon = R.drawable.vh_arrow;
+              if (!vehicle.getNumerLini().equals("")) {
+                bitmap = ImageUtils.createBusPinImage(activity, vehicle.getNumerLini());
+              } else {
+                bitmap = ImageUtils.createLongBusPinImage(activity, vehicle.getNastNumLini(), String.valueOf(vehicle.getIleSekDoOdjazdu()));
+                icon = R.drawable.vh_clock;
+              }
 
-            Bitmap bitmap;
-            int icon = R.drawable.vh_arrow;
-            if (!vehicle.getNumerLini().equals("")) {
-              bitmap = ImageUtils.createBusPinImage(activity, vehicle.getNumerLini());
-            } else {
-              bitmap = ImageUtils.createLongBusPinImage(activity, vehicle.getNastNumLini(), String.valueOf(vehicle.getIleSekDoOdjazdu()));
-              icon = R.drawable.vh_clock;
-            }
+              MarkerTag markerTag = new MarkerTag(vehicle, MarkerTag.TYPE_BUSPIN);
+              busPosition.setTag(markerTag);
+              busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
+              busPosition.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
-            MarkerTag markerTag = new MarkerTag(vehicle, MarkerTag.TYPE_BUSPIN);
-            busPosition.setTag(markerTag);
-            busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
-            busPosition.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
+              markerTag = new MarkerTag(vehicle, MarkerTag.TYPE_BUSCOMPASS);
+              busDirection.setIcon(BitmapDescriptorFactory.fromResource(icon));
+              busDirection.setRotation(vehicle.getWektor());
+              busDirection.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
-            markerTag = new MarkerTag(vehicle, MarkerTag.TYPE_BUSCOMPASS);
-            busDirection.setIcon(BitmapDescriptorFactory.fromResource(icon));
-            busDirection.setRotation(vehicle.getWektor());
-            busDirection.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
-
-            if (isMarkerInfoOpened.get()) {
-              busPosition.showInfoWindow();
-            }
-            if(cameraStatus.get(0)) {
-              map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc())));
-              cameraStatus.clear();
-              cameraStatus.add(false);
+              if (isMarkerInfoOpened.get()) {
+                busPosition.showInfoWindow();
+              }
+              if (cameraStatus.get(0)) {
+                map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc())));
+                cameraStatus.clear();
+                cameraStatus.add(false);
+              }
             }
           }
-
         }
 
         @Override
