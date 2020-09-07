@@ -46,17 +46,19 @@ public class DashboardFragment extends Fragment {
 
     Bundle bundle = this.getArguments();
 
-    String lat1 = String.valueOf(bundle.getDouble("lat2"));
-    String lng1 = String.valueOf(bundle.getDouble("lng2"));
-    String lat2 = String.valueOf(bundle.getDouble("lat1"));
-    String lng2 = String.valueOf(bundle.getDouble("lng1"));
+    String lngFrom = String.valueOf(bundle.getDouble("lngFrom"));
+    String latFrom = String.valueOf(bundle.getDouble("latFrom"));
+    String latTo = String.valueOf(bundle.getDouble("latTo"));
+    String lngTo = String.valueOf(bundle.getDouble("lngTo"));
 
-    String hour = TimeUtils.getCurrentTime();
-    String date = TimeUtils.getCurrentDate();
+    Log.i("TEST", lngFrom + " " + latFrom + " | " + lngTo + " " + latTo );
+
+    String hour = bundle.getString("time");
+    String date = bundle.getString("date");
     String lang = "pl";
     String c = "0";
     String transfers = "4";
-    String mode = "0";
+    String mode = bundle.getString("mode");
     String carriers = "";
     String skipRoutes = "";
     String vehicleFlags = "";
@@ -64,7 +66,7 @@ public class DashboardFragment extends Fragment {
 
     Log.i("TEST", "DATA: " + TimeUtils.getCurrentTime() + TimeUtils.getCurrentDate());
 
-    Call<SearchConnectionCallback> call = RetrofitXmlClient.getInstance().getMPKService().searchConnection(lat1, lng1, lat2, lng2, hour, date, lang, c, transfers, mode, carriers,skipRoutes,vehicleFlags,walkMode);
+    Call<SearchConnectionCallback> call = RetrofitXmlClient.getInstance().getMPKService().searchConnection(lngFrom, latFrom, lngTo, latTo, hour, date, lang, c, transfers, mode, carriers,skipRoutes,vehicleFlags,walkMode);
     call.enqueue(new Callback<SearchConnectionCallback>() {
       @Override
       public void onResponse(Call<SearchConnectionCallback> call, Response<SearchConnectionCallback> response) {

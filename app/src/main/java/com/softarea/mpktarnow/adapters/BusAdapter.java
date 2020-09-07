@@ -72,7 +72,7 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
   public void onBindViewHolder(ViewHolder holder, int position) {
     Departue departue = departues.get(position);
 
-    holder.busNumber.setText(String.valueOf(departue.getBusLine()));
+    holder.busNumber.setText(String.valueOf(departue.getBusLine()) + "\n" + departue.getBusId());
     holder.busDirection.setText(departue.getBusDirection());
     holder.busDepartueTime.setText(StringUtils.replaceHTML(departue.getTime()));
     holder.contentHolder.setOnClickListener(view -> {

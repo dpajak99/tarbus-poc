@@ -13,8 +13,13 @@ import com.softarea.mpktarnow.R;
 
 public class MainActivity extends AppCompatActivity {
 
-  public static Double lat;
-  public static Double lng;
+  public static Double lat_from;
+  public static Double lng_from;
+  public static Double lat_to;
+  public static Double lng_to;
+
+  public static Double lat_current;
+  public static Double lng_current;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
