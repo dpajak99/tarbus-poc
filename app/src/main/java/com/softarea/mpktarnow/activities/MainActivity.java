@@ -13,6 +13,9 @@ import com.softarea.mpktarnow.R;
 
 public class MainActivity extends AppCompatActivity {
 
+  public static Double lat;
+  public static Double lng;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);

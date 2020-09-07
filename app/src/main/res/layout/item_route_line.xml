@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_margin="3dp"
+    android:layout_height="35dp">
+    <ImageView
+        android:id="@+id/route_line_walk"
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:scaleType="fitCenter"
+        android:src="@drawable/tp_walk_simple_white"
+        android:visibility="gone"
+        android:layout_height="20dp"/>
+    <TextView
+        android:id="@+id/route_line_line"
+        android:layout_width="35dp"
+        android:background="@drawable/background_rounded_corners"
+        android:textColor="@color/darkgray"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:padding="4dp"
+        android:visibility="gone"
+        android:layout_height="35dp"/>
+</LinearLayout>

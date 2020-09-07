@@ -4,6 +4,8 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.softarea.mpktarnow.R;
 
+import java.util.Calendar;
+
 public class TimeUtils {
   public static String min2HHMM( int n ) {
     int t = n / 60;
@@ -30,8 +32,25 @@ public class TimeUtils {
     value = MathUtils.makePositive(value);
     if (value / 60 < 1) {
      return " < 1 min";
+    } else if( value / 60 >= 60){
+        int hours = (int) value / 3600;
+        int minutes = (int) (value - hours * 3600) / 60;
+        return " " + hours + " h " + minutes + " min";
     } else {
       return " " + (int) (value / 60) + " min";
     }
+  }
+
+  public static String getCurrentTime() {
+    Calendar rightNow = Calendar.getInstance();
+    return StringUtils.join( makeZero(rightNow.get(Calendar.HOUR_OF_DAY)), ":", makeZero(rightNow.get(Calendar.HOUR)));
+  }
+
+  public static String makeZero( int content ) {
+    String text = String.valueOf(content);
+    if( text.length() == 1) {
+      return StringUtils.join("0", text);
+    }
+    return text;
   }
 }

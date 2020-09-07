@@ -17,6 +17,12 @@ public class StringUtils {
       .replaceAll("ż", "z");
   }
 
+  public static String changeHashForLetters(String base) {
+    return Normalizer.normalize(base,
+      Normalizer.Form.NFD)
+      .replaceAll("&#243;", "ó");
+  }
+
   public static String replaceHTML(String base) {
     return Normalizer.normalize(base,
       Normalizer.Form.NFD)
