@@ -9,4 +9,6 @@
 
     <color name="error">#ff0000</color>
     <color name="success">#1e7e17</color>
+    <color name="darkgray">#555555</color>
+    <color name="lightgray">#bbbbbb</color>
 </resources>

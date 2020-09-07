@@ -2,6 +2,7 @@ package com.softarea.mpktarnow.services;
 
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.model.Departues;
+import com.softarea.mpktarnow.model.SearchConnectionCallback;
 import com.softarea.mpktarnow.model.VehiclesList;
 
 import retrofit2.Call;
@@ -26,4 +27,10 @@ public interface MpkService {
 
   @GET("GetTracks")
   Call<JsonArray> getTracks( @Query("routeId") String routeId, @Query("ttId") String ttId, @Query("transits") String transits );
+
+  @GET("SearchConnection")
+  Call<SearchConnectionCallback> searchConnection(@Query("lng1") String lng1, @Query("lat1") String lat1, @Query("lng2") String lng2, @Query("lat2") String lat2,
+                                                  @Query("hour") String hour, @Query("date") String date, @Query("lang") String lang, @Query("c") String c,
+                                                  @Query("transfers") String transfers, @Query("mode") String mode, @Query("carriers") String carriers,
+                                                  @Query("skipRoutes") String skipRoutes, @Query("vehicleFlags") String vehicleFlags, @Query("walkMode") String walkMode);
 }

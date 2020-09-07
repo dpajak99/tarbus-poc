@@ -1,23 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_height="match_parent"
+    <LinearLayout
+        android:id="@+id/info_box"
+        android:visibility="gone"
         android:layout_width="match_parent"
-        app:cameraBearing="0"
-        app:cameraTilt="0"
-        app:cameraZoom="15"
-        app:mapType="normal"
-        app:uiCompass="true"
-        app:uiRotateGestures="true"
-        app:uiScrollGestures="true"
-        app:uiTiltGestures="true"
-        app:uiZoomControls="true"
-        app:uiZoomGestures="true"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/activity_vertical_margin"
+        android:background="@color/colorPrimary">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_camera_position"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ok"
+            android:id="@+id/button_select_location"/>
+    </LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            app:cameraBearing="0"
+            app:cameraTilt="0"
+            app:cameraZoom="15"
+            app:mapType="normal"
+            app:uiCompass="true"
+            app:uiRotateGestures="true"
+            app:uiScrollGestures="true"
+            app:uiTiltGestures="true"
+            app:uiZoomControls="true"
+            app:uiZoomGestures="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv_viewfinder"
+            android:text="+"
+            android:visibility="gone"
+            android:textSize="20sp"
+            android:layout_gravity="center"
+            android:textColor="#ff0000"/>
+    </FrameLayout>
 </LinearLayout>
