@@ -43,7 +43,13 @@ public class TimeUtils {
 
   public static String getCurrentTime() {
     Calendar rightNow = Calendar.getInstance();
-    return StringUtils.join( makeZero(rightNow.get(Calendar.HOUR_OF_DAY)), ":", makeZero(rightNow.get(Calendar.HOUR)));
+    return StringUtils.join( makeZero(rightNow.get(Calendar.HOUR_OF_DAY)), ":", makeZero(rightNow.get(Calendar.MINUTE)));
+  }
+
+  public static String getCurrentDate() {
+    //"2020-09-04"
+    Calendar rightNow = Calendar.getInstance();
+    return StringUtils.join( makeZero(rightNow.get(Calendar.YEAR)), "-", makeZero(rightNow.get(Calendar.MONTH)), "-", makeZero(rightNow.get(Calendar.DAY_OF_MONTH)));
   }
 
   public static String makeZero( int content ) {

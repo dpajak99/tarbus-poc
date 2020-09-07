@@ -122,7 +122,11 @@ public class MapUtils {
               AlertUtils.alert(activity, activity.getString(R.string.error_download_shedule));
             }
           });
-          return true;
+          break;
+        case MarkerTag.TYPE_BUSSTOPEND:
+          break;
+        case MarkerTag.TYPE_BUSCOMPASS:
+          break;
       }
 
       return true;
@@ -174,7 +178,6 @@ public class MapUtils {
       if (busId.equals("0")) {
         busId = "";
       }
-      Log.i("TEST", "busId = " + busId);
       Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles(String.valueOf(bundle.getInt("busLine")), "", busId);
       //Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles("", "", "");
       //Call<VehiclesList> call = RetrofitXmlClient.getInstance().getMPKService().getVehicles("9", "", "");
@@ -183,7 +186,6 @@ public class MapUtils {
         public void onResponse(Call<VehiclesList> call, Response<VehiclesList> response) {
           if (!response.headers().get("content-length").equals("15")) {
             VehiclesList jsonVehicles = response.body();
-            Log.i("TEST", "okej2 + " + response.toString());
             for (int i = 0; i < jsonVehicles.getJsonVehicles().size(); i++) {
               vehicles.add(MpkDAO.parseJsonToVehicle(jsonVehicles.getJsonVehicles().get(i).getContent()));
               Vehicle vehicle = vehicles.get(i);
@@ -204,6 +206,7 @@ public class MapUtils {
 
               markerTag = new MarkerTag(vehicle, MarkerTag.TYPE_BUSCOMPASS);
               busDirection.setIcon(BitmapDescriptorFactory.fromResource(icon));
+              busDirection.setTag(markerTag);
               busDirection.setRotation(vehicle.getWektor());
               busDirection.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
@@ -256,7 +259,7 @@ public class MapUtils {
                   .icon(BitmapDescriptorFactory.fromResource(icon_resource)));
               markerBusStop.setTag(new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOP));
 
-              if (i < routeWariant.getPointsOnTrack().size() - 1) {
+              if (i < routeWariant.getPointsOnTrack().size()) {
                 RouteHolder routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
                 for (int j = 0; j < routeHolder.getPoints().size(); j++) {
                   if (j < routeHolder.getPoints().size() - 1) {
@@ -267,6 +270,15 @@ public class MapUtils {
                       .startCap(new RoundCap())
                       .jointType(JointType.ROUND)
                       .color(activity.getColor(trackColor)));
+                  }
+                  if (i == routeWariant.getPointsOnTrack().size() - 1 && j == routeHolder.getPoints().size() - 1) {
+                    Marker markerEndTrack = mapService.getMap().addMarker(
+                      new MarkerOptions()
+                        .position(routeHolder.getPoints().get(j).getCoords())
+                        .zIndex(0)
+                        .anchor(0.5f, 0.5f)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_buspoint_red)));
+                    markerEndTrack.setTag(new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOPEND));
                   }
                 }
               }

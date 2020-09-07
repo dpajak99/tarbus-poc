@@ -1,7 +1,6 @@
 package com.softarea.mpktarnow.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,40 +74,37 @@ public class ResultRouteBusStopsAdapter extends RecyclerView.Adapter<ResultRoute
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
     SearchResultPoint searchResult = searchResults.get(position);
-    Log.i("TEST", searchResult.toString());
     if (searchResult.getBusLine().length() == 0 || (searchResult.getBusLine().length() != 0 && searchResult.isChangeBus())) {
-      int status = 1;
-      if (searchResult.isEnterBus()) {
-        status = -1;
-      }
       holder.layoutWalkSection.setVisibility(View.VISIBLE);
 
-      if( position == 0) {
-        holder.tvWalkTime.setText(MathUtils.calcDistanse(searchResult.getLat(), searchResult.getLng(), searchResults.get(position + 1).getLat(), searchResults.get(position + 1).getLng()) +  " metrów");
+      if (position == 0) {
+        holder.tvWalkTime.setText(MathUtils.calcDistanse(searchResult.getLat(), searchResult.getLng(), searchResults.get(position + 1).getLat(), searchResults.get(position + 1).getLng()) + " metrów");
       } else {
         holder.tvWalkTime.setText(MathUtils.calcDistanse(searchResult.getLat(), searchResult.getLng(), searchResults.get(position - 1).getLat(), searchResults.get(position - 1).getLng()) + " metrów");
       }
-
-
-      holder.tvWalkDestination.setText(searchResults.get(position + status).getBusStopName());
-      if (searchResult.getBusLine().length() != 0 && searchResult.isChangeBus()) {
-        holder.tvWalkDestination.setText(searchResults.get(position).getBusStopName());
+      holder.tvWalkDestination.setText("do Twojego celu");
+      if (searchResult.isChangeBus()) {
+        holder.tvWalkDestination.setText( "do: " + searchResult.getBusStopName());
+      } else if ( position == 0 ) {
+        holder.tvWalkDestination.setText( "do: " + searchResults.get(position + 1).getBusStopName());
       }
     }
 
     if (position != 0 && position != getItemCount() - 1) {
-      if (searchResults.get(position + 1).isEnterBus() || searchResult.isEnterBus()) {
+      if (searchResults.get(position).isEnterBus() || searchResults.get(position).isChangeBus()) {
+        holder.busDetails.setVisibility(View.VISIBLE);
+        holder.tvRouteLine.setText(searchResult.getBusLine());
+        holder.tvRouteDepartue.setText(TimeUtils.calcDelayValue(searchResult.getTimeInSec2()));
+
+        holder.layoutBusSection.setVisibility(View.VISIBLE);
+        holder.tvBusStopName.setText(searchResult.getBusStopName());
+        holder.icoBusPoint.setImageResource(R.drawable.bs_point_start);
+        holder.tvBusStopArrive.setText(TimeUtils.sec2HHMM(searchResult.getTimeInSec1())); //to jest okej
+      } else if ( (position < getItemCount()-1 && searchResults.get(position + 1).isChangeBus()) || position + 1 == getItemCount() - 1 ) {
         holder.layoutBusSection.setVisibility(View.VISIBLE);
         holder.icoBusPoint.setImageResource(R.drawable.bs_point_end);
         holder.tvBusStopName.setText(searchResult.getBusStopName());
         holder.tvBusStopArrive.setText(TimeUtils.sec2HHMM(searchResult.getTimeInSec1())); //to jest okej
-
-        if( searchResult.isEnterBus() ) {
-          holder.busDetails.setVisibility(View.VISIBLE);
-          holder.tvRouteLine.setText(searchResult.getBusLine());
-          holder.tvRouteDepartue.setText(TimeUtils.calcDelayValue(searchResult.getTimeInSec2()));
-          holder.icoBusPoint.setImageResource(R.drawable.bs_point_start);
-        }
       }
     }
   }

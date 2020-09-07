@@ -1,7 +1,6 @@
 package com.softarea.mpktarnow.ui;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +62,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         MainActivity.lng = position.longitude;
         MainActivity.lat = position.latitude;
         cameraCoordsValue.setText(position.latitude + " " + position.longitude);
-        Log.i("TEST", googleMap.getCameraPosition().toString());
       });
 
       Button buttonSearchOnMap = root.findViewById(R.id.button_select_location);

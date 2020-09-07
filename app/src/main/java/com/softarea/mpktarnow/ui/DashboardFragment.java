@@ -52,7 +52,7 @@ public class DashboardFragment extends Fragment {
     String lng2 = String.valueOf(bundle.getDouble("lng1"));
 
     String hour = TimeUtils.getCurrentTime();
-    String date = "2020-09-04";
+    String date = TimeUtils.getCurrentDate();
     String lang = "pl";
     String c = "0";
     String transfers = "4";
@@ -62,14 +62,13 @@ public class DashboardFragment extends Fragment {
     String vehicleFlags = "";
     String walkMode = "undefined";
 
-    Log.i("TEST", lat1 + " " + lng1 + " | " + lat2 + " " + lng2);
+    Log.i("TEST", "DATA: " + TimeUtils.getCurrentTime() + TimeUtils.getCurrentDate());
 
     Call<SearchConnectionCallback> call = RetrofitXmlClient.getInstance().getMPKService().searchConnection(lat1, lng1, lat2, lng2, hour, date, lang, c, transfers, mode, carriers,skipRoutes,vehicleFlags,walkMode);
     call.enqueue(new Callback<SearchConnectionCallback>() {
       @Override
       public void onResponse(Call<SearchConnectionCallback> call, Response<SearchConnectionCallback> response) {
         SearchConnectionCallback connection = response.body();
-        Log.i("TEST", "RESPONSE");
         List<SearchResult> searchResults = new ArrayList<>();
         try {
           JSONArray resultWariants = new JSONArray(connection.getJson());
