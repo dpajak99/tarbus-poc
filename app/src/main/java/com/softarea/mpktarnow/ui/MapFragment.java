@@ -19,13 +19,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.activities.MainActivity;
 import com.softarea.mpktarnow.services.GoogleMapService;
+import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.statics.Statics;
-import com.softarea.mpktarnow.utils.MapUtils;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback {
   Bundle bundle;
   View root;
-
+  MapService mapUtils;
 
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
@@ -44,14 +44,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
   @Override
   public void onMapReady(GoogleMap googleMap) {
-    MapUtils mapUtils = new MapUtils(new GoogleMapService(requireActivity(), root, googleMap), bundle);
+    int bundleKey = bundle.getInt("key");
+    mapUtils = new MapService(new GoogleMapService(requireActivity(), root, googleMap), bundle);
     mapUtils.setListeners();
-    if (bundle.getString("key").equals("busStopList")) {
+    if ( bundleKey == MapService.BUNDLE_BUS_STOP_LIST) {
       mapUtils.showBusStops();
-    } else if (bundle.getString("key").equals("busDetails")) {
-      mapUtils.showTrack();
-      mapUtils.showBusDetails();
-    } else if (bundle.getString("key").equals("getFrom") || bundle.getString("key").equals("getTo")) {
+    } else if (bundleKey == MapService.BUNDLE_BUS_DETAILS) {
+      mapUtils.getTrack();
+      mapUtils.getBusDetails();
+    } else if( bundleKey == MapService.BUNDLE_SEARCH_CONNECTION) {
+      mapUtils.setSearchTrack(MainActivity.searchConnectionList);
+    } else if (bundleKey == MapService.BUNDLE_MAP_GET_FROM || bundleKey == MapService.BUNDLE_MAP_GET_TO) {
       LinearLayout boxInfo = root.findViewById(R.id.info_box);
       TextView viewFinder = root.findViewById(R.id.tv_viewfinder);
       boxInfo.setVisibility(View.VISIBLE);
@@ -59,11 +62,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
       TextView cameraCoordsValue = root.findViewById(R.id.tv_camera_position);
       googleMap.setOnCameraMoveListener(() -> {
+
         LatLng position = googleMap.getCameraPosition().target;
-        if (bundle.getString("key").equals("getFrom")) {
+        if (bundleKey == MapService.BUNDLE_MAP_GET_FROM ) {
           MainActivity.lng_from = position.longitude;
           MainActivity.lat_from = position.latitude;
-        } else if (bundle.getString("key").equals("getTo")) {
+        } else {
           MainActivity.lng_to = position.longitude;
           MainActivity.lat_to = position.latitude;
         }
@@ -74,10 +78,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
       buttonSearchOnMap.setOnClickListener(view -> {
         getFragmentManager().popBackStackImmediate();
       });
+
+
     }
 
+    mapUtils.showCurrentLocation();
+    googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(Statics.centerLng, Statics.centerLat)));
+  }
 
-    LatLng coords_tarnow = new LatLng(Statics.centerLng, Statics.centerLat);
-    googleMap.moveCamera(CameraUpdateFactory.newLatLng(coords_tarnow));
+  @Override
+  public void onStop() {
+    super.onStop();
+    mapUtils.stopRefreshingMap();
   }
 }

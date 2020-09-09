@@ -22,17 +22,22 @@ import androidx.navigation.Navigation;
 import com.google.android.gms.maps.model.LatLng;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.activities.MainActivity;
+import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.utils.GeoUtils;
+import com.softarea.mpktarnow.utils.StringUtils;
 import com.softarea.mpktarnow.utils.TimeUtils;
 
 import java.io.IOException;
 import java.util.Calendar;
 
 public class NotificationsFragment extends Fragment {
-  EditText endPoint;
-  EditText startPoint;
-  DatePickerDialog datePicker;
-  TimePickerDialog timePicker;
+  private static final int UPDATE_FIRST = 10;
+  private static final int UPDATE_SECOND = 11;
+
+  private EditText endPoint;
+  private EditText startPoint;
+  private DatePickerDialog datePicker;
+  private TimePickerDialog timePicker;
 
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
@@ -46,7 +51,10 @@ public class NotificationsFragment extends Fragment {
       GeoUtils.getCurrentLocation(handler, getContext(), UPDATE_FIRST);
     }
 
-    String[] searchTypes = {"Odjazd", "Przyjazd"};
+    String[] searchTypes = {
+      getActivity().getText(R.string.departue).toString(),
+      getActivity().getText(R.string.arrival).toString()};
+
     Spinner spinner = root.findViewById(R.id.search_types);
     ArrayAdapter arrayAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, searchTypes);
     arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -59,10 +67,12 @@ public class NotificationsFragment extends Fragment {
     selectTime.setText(TimeUtils.getCurrentTime());
     selectTime.setOnClickListener(v -> {
       final Calendar cldr = Calendar.getInstance();
-      int hour = cldr.get(Calendar.HOUR_OF_DAY);
-      int minutes = cldr.get(Calendar.MINUTE);
       timePicker = new TimePickerDialog(getContext(),
-        (tp, sHour, sMinute) -> selectTime.setText(sHour + ":" + sMinute), hour, minutes, true);
+        (tp, sHour, sMinute) ->
+          selectTime.setText(StringUtils.join(sHour, ":",sMinute)),
+        cldr.get(Calendar.HOUR_OF_DAY),
+        cldr.get(Calendar.MINUTE),
+        true);
       timePicker.show();
     });
 
@@ -70,25 +80,26 @@ public class NotificationsFragment extends Fragment {
     selectDate.setText(TimeUtils.getCurrentDate());
     selectDate.setOnClickListener(v -> {
       final Calendar cldr = Calendar.getInstance();
-      int day = cldr.get(Calendar.DAY_OF_MONTH);
-      int month = cldr.get(Calendar.MONTH);
-      int year = cldr.get(Calendar.YEAR);
       datePicker = new DatePickerDialog(getContext(),
-        (view, year1, monthOfYear, dayOfMonth) -> selectDate.setText(year1 + "-" + monthOfYear + "-" + dayOfMonth), year, month, day);
+        (view, year1, monthOfYear, dayOfMonth) ->
+          selectDate.setText(StringUtils.join(year1, "-",  monthOfYear,  "-", dayOfMonth)),
+        cldr.get(Calendar.YEAR),
+        cldr.get(Calendar.MONTH),
+        cldr.get(Calendar.DAY_OF_MONTH));
       datePicker.show();
     });
 
     Button buttonSearchOnMapTo = root.findViewById(R.id.btn_searchby_map_to);
     buttonSearchOnMapTo.setOnClickListener(view -> {
       Bundle result = new Bundle();
-      result.putString("key", "getTo");
+      result.putInt("key", MapService.BUNDLE_MAP_GET_TO);
       Navigation.findNavController(root).navigate(R.id.navigation_map, result);
     });
 
     Button buttonSearchOnMapFrom = root.findViewById(R.id.btn_searchby_map_from);
     buttonSearchOnMapFrom.setOnClickListener(view -> {
       Bundle result = new Bundle();
-      result.putString("key", "getFrom");
+      result.putInt("key", MapService.BUNDLE_MAP_GET_FROM);
       Navigation.findNavController(root).navigate(R.id.navigation_map, result);
     });
 
@@ -134,34 +145,6 @@ public class NotificationsFragment extends Fragment {
     super.onStart();
   }
 
-  private static final int UPDATE_FIRST = 10;
-  private static final int UPDATE_SECOND = 11;
-  LatLng pos;
-  @SuppressLint("HandlerLeak")
-  private Handler handler = new Handler() {
-    @Override
-    public void handleMessage(Message msg) {
-      super.handleMessage(msg);
-      switch (msg.what) {
-        case GeoUtils.STATUS_CURRENT_POSITION:
-          pos = (LatLng) msg.obj;
-          MainActivity.lat_current = pos.latitude;
-          MainActivity.lng_current = pos.longitude;
-          break;
-        case UPDATE_FIRST:
-          MainActivity.lat_from = MainActivity.lat_current;
-          MainActivity.lng_from = MainActivity.lng_current;
-          setPositionFrom();
-          break;
-        case UPDATE_SECOND:
-          MainActivity.lat_to = MainActivity.lat_current;
-          MainActivity.lng_to = MainActivity.lng_current;
-          setPositionTo();
-          break;
-      }
-    }
-  };
-
   private void setPositionFrom() {
     if (MainActivity.lat_from != null && MainActivity.lng_from != null) {
       try {
@@ -181,4 +164,29 @@ public class NotificationsFragment extends Fragment {
       }
     }
   }
+
+  @SuppressLint("HandlerLeak")
+  private Handler handler = new Handler() {
+    @Override
+    public void handleMessage(Message msg) {
+      super.handleMessage(msg);
+      switch (msg.what) {
+        case GeoUtils.STATUS_CURRENT_POSITION:
+          LatLng pos = (LatLng) msg.obj;
+          MainActivity.lat_current = pos.latitude;
+          MainActivity.lng_current = pos.longitude;
+          break;
+        case UPDATE_FIRST:
+          MainActivity.lat_from = MainActivity.lat_current;
+          MainActivity.lng_from = MainActivity.lng_current;
+          setPositionFrom();
+          break;
+        case UPDATE_SECOND:
+          MainActivity.lat_to = MainActivity.lat_current;
+          MainActivity.lng_to = MainActivity.lng_current;
+          setPositionTo();
+          break;
+      }
+    }
+  };
 }

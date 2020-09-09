@@ -9,12 +9,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.model.Departue;
+import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.utils.ListUtils;
 import com.softarea.mpktarnow.utils.StringUtils;
 
@@ -24,9 +24,7 @@ import java.util.List;
 
 public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
 
-  private List<Departue> departues= new ArrayList<>();;
-
-  FragmentActivity activity;
+  private List<Departue> departues= new ArrayList<>();
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public TextView busNumber;
@@ -54,8 +52,7 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
     this.notifyDataSetChanged();
   }
 
-  public BusAdapter(FragmentActivity activity) {
-    this.activity = activity;
+  public BusAdapter() {
   }
 
   @NonNull
@@ -72,12 +69,12 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
   public void onBindViewHolder(ViewHolder holder, int position) {
     Departue departue = departues.get(position);
 
-    holder.busNumber.setText(String.valueOf(departue.getBusLine()) + "\n" + departue.getBusId());
+    holder.busNumber.setText(departue.getBusLine() + "\n" + departue.getBusId());
     holder.busDirection.setText(departue.getBusDirection());
     holder.busDepartueTime.setText(StringUtils.replaceHTML(departue.getTime()));
     holder.contentHolder.setOnClickListener(view -> {
       Bundle result = new Bundle();
-      result.putString("key", "busDetails");
+      result.putInt("key", MapService.BUNDLE_BUS_DETAILS);
       result.putInt("busLine", departue.getBusLine());
       result.putInt("busId", departue.getBusId());
       result.putInt("wariantId", departue.getWariantId());

@@ -33,6 +33,47 @@ public class ImageUtils {
     canvas.drawText(text, x, y, paint);
     return bitmap;
   }
+
+  public static Bitmap createYourPositionPin(Context context, String text) {
+    Resources resources = context.getResources();
+    float scale = resources.getDisplayMetrics().density;
+    Bitmap bitmap = BitmapFactory.decodeResource(resources, R.drawable.ic_cursor);
+    bitmap = bitmap.copy(ARGB_8888, true);
+
+    Canvas canvas = new Canvas(bitmap);
+    Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    paint.setColor(context.getColor(R.color.colorPrimary));
+    paint.setFakeBoldText(true);
+    paint.setTextSize(9 * scale);
+    Rect bounds = new Rect();
+    paint.getTextBounds(text, 0, text.length(), bounds);
+
+    int x = bitmap.getWidth() / 2 - 7 * text.length();
+    int y = bounds.height();
+    canvas.drawText(text, x, y, paint);
+    return bitmap;
+  }
+
+  public static Bitmap createBusChangeImage(Context context, String text) {
+    Resources resources = context.getResources();
+    float scale = resources.getDisplayMetrics().density;
+    Bitmap bitmap = BitmapFactory.decodeResource(resources, R.drawable.tp_transit);
+    bitmap = bitmap.copy(ARGB_8888, true);
+
+    Canvas canvas = new Canvas(bitmap);
+    Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    paint.setColor(context.getColor(R.color.colorPrimary));
+    paint.setFakeBoldText(true);
+    paint.setTextSize(9 * scale);
+    Rect bounds = new Rect();
+    paint.getTextBounds(text, 0, text.length(), bounds);
+
+    int x = bitmap.getWidth() / 2 - 7 * text.length();
+    int y = bounds.height() + 24;
+    canvas.drawText(text, x, y, paint);
+    return bitmap;
+  }
+
   public static Bitmap createLongBusPinImage(Context context, String text, String departue) {
     text = StringUtils.deleteWhiteSpaces(text);
     Resources resources = context.getResources();

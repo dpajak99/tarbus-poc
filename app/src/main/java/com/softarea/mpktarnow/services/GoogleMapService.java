@@ -7,14 +7,16 @@ import androidx.fragment.app.FragmentActivity;
 import com.google.android.gms.maps.GoogleMap;
 
 public class GoogleMapService {
-  GoogleMap mMap;
-  View view;
-  FragmentActivity activity;
+  private GoogleMap mMap;
+  private View view;
+  private FragmentActivity activity;
 
   public GoogleMapService(FragmentActivity activity, View view, GoogleMap googleMap ) {
     this.activity = activity;
     this.view = view;
     this.mMap = googleMap;
+
+    this.mMap.setMaxZoomPreference(16);
   }
 
   public GoogleMap getMap() {
