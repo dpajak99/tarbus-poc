@@ -1,5 +1,7 @@
 package com.softarea.mpktarnow.model;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.List;
 
 public class SearchResultPoint {
@@ -72,6 +74,10 @@ public class SearchResultPoint {
 
   public double getLng() {
     return lng;
+  }
+
+  public LatLng getCoords() {
+    return new LatLng(this.lng, this.lat);
   }
 
   public boolean isEnterBus() {

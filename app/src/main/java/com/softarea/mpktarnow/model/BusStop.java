@@ -48,6 +48,15 @@ public class BusStop {
     this.number = number;
   }
 
+  @Ignore
+  public BusStop(SearchResultPoint searchResultPoint) {
+    this.id = searchResultPoint.getBusStopId();
+    this.idCity = searchResultPoint.getZero1();
+    this.latitude = searchResultPoint.getLat();
+    this.longitude = searchResultPoint.getLng();
+    this.name = searchResultPoint.getBusStopName();
+  }
+
   @Override
   public String toString() {
     return "BusStop{" +

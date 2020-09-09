@@ -18,6 +18,7 @@ import java.util.Locale;
 
 public class GeoUtils {
   public static final int STATUS_CURRENT_POSITION = 0;
+  public static final int UPDATE_POSITION = 1;
 
   public static String getPlaceFromCoords(Handler handler, Context context, LatLng coords ) throws IOException {
     Geocoder geocoder = new Geocoder(context, Locale.getDefault());

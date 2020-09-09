@@ -10,6 +10,9 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.softarea.mpktarnow.R;
+import com.softarea.mpktarnow.model.SearchResultPoint;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
   public static Double lat_current;
   public static Double lng_current;
+
+  public static List<SearchResultPoint> searchConnectionList;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

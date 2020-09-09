@@ -136,7 +136,7 @@ public class NotificationsFragment extends Fragment {
 
   private static final int UPDATE_FIRST = 10;
   private static final int UPDATE_SECOND = 11;
-  LatLng pos;
+
   @SuppressLint("HandlerLeak")
   private Handler handler = new Handler() {
     @Override
@@ -144,7 +144,7 @@ public class NotificationsFragment extends Fragment {
       super.handleMessage(msg);
       switch (msg.what) {
         case GeoUtils.STATUS_CURRENT_POSITION:
-          pos = (LatLng) msg.obj;
+          LatLng pos = (LatLng) msg.obj;
           MainActivity.lat_current = pos.latitude;
           MainActivity.lng_current = pos.longitude;
           break;

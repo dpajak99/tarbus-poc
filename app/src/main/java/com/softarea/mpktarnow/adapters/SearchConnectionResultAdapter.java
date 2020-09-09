@@ -1,18 +1,22 @@
 package com.softarea.mpktarnow.adapters;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
+import com.softarea.mpktarnow.activities.MainActivity;
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
 import com.softarea.mpktarnow.utils.StringUtils;
@@ -30,6 +34,7 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
     public RecyclerView foundRoute;
     public RecyclerView foundRouteList;
     public TextView busStops;
+    public LinearLayout goToMap;
     public ResultRouteLineAdapter resultRouteLineAdapter;
     public ResultRouteBusStopsAdapter resultRouteBusStopsAdapter;
 
@@ -38,6 +43,7 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
       super(itemView);
       foundRoute = itemView.findViewById(R.id.tv_found_route);
       foundRouteList = itemView.findViewById(R.id.rv_found_route_list);
+      goToMap = itemView.findViewById(R.id.go_to_map);
       busStops = itemView.findViewById(R.id.tv_bus_stops);
     }
   }
@@ -51,7 +57,7 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
   @NonNull
   @Override
   public SearchConnectionResultAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                              int viewType) {
+                                                                     int viewType) {
     context = parent.getContext();
     LayoutInflater layoutInflater = LayoutInflater.from(context);
     View listItem = layoutInflater.inflate(R.layout.item_search_result, parent, false);
@@ -65,20 +71,29 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
     track.add(-1);
 
     String busStopsList = "";
-    for(int i = 0; i < searchResult.getData().size(); i++) {
+    for (int i = 0; i < searchResult.getData().size(); i++) {
       SearchResultPoint searchResultPoint = searchResult.getData().get(i);
       busStopsList = StringUtils.join(busStopsList, searchResultPoint.getBusStopName(), "\n");
-      if(searchResultPoint.isEnterBus()) {
-        if(i == 1) {
+      if (searchResultPoint.isEnterBus()) {
+        if (i == 1) {
           track.add(Integer.parseInt(searchResultPoint.getBusLine()));
         } else {
           track.add(-1);
         }
       }
-      if(searchResultPoint.isChangeBus()) {
+      if (searchResultPoint.isChangeBus()) {
         track.add(Integer.parseInt(searchResultPoint.getBusLine()));
       }
     }
+
+    holder.goToMap.setOnClickListener(view -> {
+      Log.i("TEST", "CLICKING WORKING");
+      Bundle result = new Bundle();
+      result.putString("key", "searchConnection");
+      MainActivity.searchConnectionList = searchResult.getData();
+      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
+    });
+
     holder.busStops.setText(busStopsList);
 
     holder.resultRouteLineAdapter = new ResultRouteLineAdapter();
@@ -93,13 +108,6 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
     holder.foundRouteList.setAdapter(holder.resultRouteBusStopsAdapter);
     Log.i("TEST", "Size: " + searchResult.getData().size());
     holder.resultRouteBusStopsAdapter.update(searchResult.getData());
-
-   /* holder.busStop.setOnClickListener(view -> {
-      Bundle result = new Bundle();
-      result.putInt("id", busStop.getId());
-
-      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_bus_stop_details, result);
-    });*/
   }
 
   @Override

@@ -4,22 +4,29 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <LinearLayout
+        android:id="@+id/go_to_map"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/background_rounded_corners_blue"
-        android:padding="5dp"
-        android:id="@+id/tv_found_route"/>
+        android:background="#ff0000"
+        android:layout_height="200dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/tv_found_route"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_rounded_corners_blue"
+            android:padding="5dp" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_found_route_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:id="@+id/rv_found_route_list"/>
+        android:padding="5dp" />
 
     <TextView
         android:id="@+id/tv_bus_stops"
         android:layout_width="match_parent"
-        android:visibility="gone"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 </LinearLayout>

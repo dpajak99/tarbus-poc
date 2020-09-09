@@ -15,6 +15,8 @@ public class GoogleMapService {
     this.activity = activity;
     this.view = view;
     this.mMap = googleMap;
+
+    this.mMap.setMaxZoomPreference(16);
   }
 
   public GoogleMap getMap() {
