@@ -1,7 +1,6 @@
 package com.softarea.mpktarnow.ui;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,16 +44,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
   @Override
   public void onMapReady(GoogleMap googleMap) {
+    int bundleKey = bundle.getInt("key");
     mapUtils = new MapService(new GoogleMapService(requireActivity(), root, googleMap), bundle);
     mapUtils.setListeners();
-    if (bundle.getString("key").equals("busStopList")) {
+    if ( bundleKey == MapService.BUNDLE_BUS_STOP_LIST) {
       mapUtils.showBusStops();
-    } else if (bundle.getString("key").equals("busDetails")) {
+    } else if (bundleKey == MapService.BUNDLE_BUS_DETAILS) {
       mapUtils.getTrack();
       mapUtils.getBusDetails();
-    } else if( bundle.getString("key").equals("searchConnection")) {
+    } else if( bundleKey == MapService.BUNDLE_SEARCH_CONNECTION) {
       mapUtils.setSearchTrack(MainActivity.searchConnectionList);
-    } else if (bundle.getString("key").equals("getFrom") || bundle.getString("key").equals("getTo")) {
+    } else if (bundleKey == MapService.BUNDLE_MAP_GET_FROM || bundleKey == MapService.BUNDLE_MAP_GET_TO) {
       LinearLayout boxInfo = root.findViewById(R.id.info_box);
       TextView viewFinder = root.findViewById(R.id.tv_viewfinder);
       boxInfo.setVisibility(View.VISIBLE);
@@ -64,14 +64,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
       googleMap.setOnCameraMoveListener(() -> {
 
         LatLng position = googleMap.getCameraPosition().target;
-        if (bundle.getString("key").equals("getFrom")) {
+        if (bundleKey == MapService.BUNDLE_MAP_GET_FROM ) {
           MainActivity.lng_from = position.longitude;
           MainActivity.lat_from = position.latitude;
-        } else if (bundle.getString("key").equals("getTo")) {
+        } else {
           MainActivity.lng_to = position.longitude;
           MainActivity.lat_to = position.latitude;
         }
-        Log.i("TEST", googleMap.getCameraPosition().toString());
         cameraCoordsValue.setText(position.latitude + " " + position.longitude);
       });
 
@@ -84,8 +83,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     mapUtils.showCurrentLocation();
-    LatLng coords_tarnow = new LatLng(Statics.centerLng, Statics.centerLat);
-    googleMap.moveCamera(CameraUpdateFactory.newLatLng(coords_tarnow));
+    googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(Statics.centerLng, Statics.centerLat)));
   }
 
   @Override

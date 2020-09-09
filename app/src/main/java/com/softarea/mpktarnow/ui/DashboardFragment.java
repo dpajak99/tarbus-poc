@@ -26,7 +26,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DashboardFragment extends Fragment {
-  SearchConnectionResultAdapter searchConnectionResultAdapter;
+  private  SearchConnectionResultAdapter searchConnectionResultAdapter;
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
     View root = inflater.inflate(R.layout.fragment_dashboard, container, false);

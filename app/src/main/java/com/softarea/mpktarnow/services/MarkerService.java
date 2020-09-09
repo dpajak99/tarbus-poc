@@ -8,8 +8,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.softarea.mpktarnow.model.MarkerTag;
 
 public class MarkerService {
-  Marker marker;
-  GoogleMap googleMap;
+  private Marker marker;
+  private GoogleMap googleMap;
 
   public MarkerService(GoogleMap googleMap, LatLng position, int zIndex, MarkerTag tag, boolean anchor) {
     this.googleMap = googleMap;

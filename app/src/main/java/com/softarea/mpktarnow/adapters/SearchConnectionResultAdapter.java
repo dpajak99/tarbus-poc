@@ -19,6 +19,7 @@ import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.activities.MainActivity;
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
+import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -87,9 +88,8 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
     }
 
     holder.goToMap.setOnClickListener(view -> {
-      Log.i("TEST", "CLICKING WORKING");
       Bundle result = new Bundle();
-      result.putString("key", "searchConnection");
+      result.putInt("key", MapService.BUNDLE_SEARCH_CONNECTION);
       MainActivity.searchConnectionList = searchResult.getData();
       Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
     });

@@ -10,4 +10,7 @@
     <string name="current_acceleration">Aktualne przyśpieszenie</string>
 
     <string name="error_download_shedule">Wystąpił błąd podczas pobierania najbliższych odjazdów z przystanku</string>
+    <string name="you_are_here">Tutaj jesteś</string>
+    <string name="departue">Odjazd</string>
+    <string name="arrival">Przyjazd</string>
 </resources>

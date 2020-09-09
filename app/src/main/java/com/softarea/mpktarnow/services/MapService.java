@@ -1,11 +1,9 @@
 package com.softarea.mpktarnow.services;
 
 import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.Navigation;
@@ -28,7 +26,7 @@ import com.softarea.mpktarnow.dao.BusStopDAO;
 import com.softarea.mpktarnow.dao.RouteDAO;
 import com.softarea.mpktarnow.model.AutoRefresh;
 import com.softarea.mpktarnow.model.BusStop;
-import com.softarea.mpktarnow.model.Departues;
+import com.softarea.mpktarnow.model.BusStopInfoMapBox;
 import com.softarea.mpktarnow.model.ListMediator;
 import com.softarea.mpktarnow.model.MarkerTag;
 import com.softarea.mpktarnow.model.Route;
@@ -37,7 +35,6 @@ import com.softarea.mpktarnow.model.RoutePoint;
 import com.softarea.mpktarnow.model.RouteWariant;
 import com.softarea.mpktarnow.model.SearchResultPoint;
 import com.softarea.mpktarnow.model.Vehicle;
-import com.softarea.mpktarnow.utils.AlertUtils;
 import com.softarea.mpktarnow.utils.DatabaseUtils;
 import com.softarea.mpktarnow.utils.GeoUtils;
 import com.softarea.mpktarnow.utils.ImageUtils;
@@ -48,26 +45,29 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class MapService {
-  AtomicBoolean isMarkerInfoOpened = new AtomicBoolean(false);
-  GoogleMapService mapService;
-  GoogleMap map;
-  FragmentActivity activity;
-  Bundle bundle;
-  List<Boolean> cameraStatus = new ArrayList<>();
-  MarkerService busPosition;
-  MarkerService busDirection;
-  AutoRefresh autoRefresh;
-
   private static final int MARKER_BUSSTOP_START = 0;
   private static final int MARKER_BUSSTOP_END = 1;
   private static final int MARKER_BUSSTOP_CITY = 2;
   private static final int MARKER_BUSSTOP_ZONE = 3;
-  private static final int MARKER_BUSSTOP_TRACK = 3;
+  private static final int MARKER_BUSSTOP_TRACK = 4;
+
+  public static final int BUNDLE_BUS_DETAILS = 5;
+  public static final int BUNDLE_BUS_STOP_LIST = 6;
+  public static final int BUNDLE_SEARCH_CONNECTION = 7;
+  public static final int BUNDLE_MAP_GET_FROM = 8;
+  public static final int BUNDLE_MAP_GET_TO = 9;
+
+  private AtomicBoolean isMarkerInfoOpened = new AtomicBoolean(false);
+  private GoogleMapService mapService;
+  private GoogleMap map;
+  private FragmentActivity activity;
+  private Bundle bundle;
+  private List<Boolean> cameraStatus = new ArrayList<>();
+  private MarkerService busPosition;
+  private MarkerService busDirection;
+  private AutoRefresh autoRefresh;
+  private MapScheduleAdapter mapScheduleAdapter;
 
   public MapService(GoogleMapService mapService, Bundle bundle) {
     this.mapService = mapService;
@@ -75,12 +75,54 @@ public class MapService {
     this.activity = mapService.getActivity();
     this.bundle = bundle;
     setCameraMovingStatus(true);
-     autoRefresh = new AutoRefresh() {
+    autoRefresh = new AutoRefresh() {
       @Override
       public void refreshFunction() {
-          refreshMap();
+        refreshMap();
       }
     };
+  }
+
+  public void refreshMap() {
+    if (bundle.getInt( "key" ) == MapService.BUNDLE_BUS_DETAILS) {
+      getBusDetails();
+    }
+  }
+
+  public void stopRefreshingMap() {
+    autoRefresh.stopRefreshing();
+  }
+
+  public void setCameraMovingStatus(boolean status) {
+    cameraStatus.clear();
+    cameraStatus.add(status);
+  }
+
+  public void showCurrentLocation() {
+    GeoUtils.getCurrentLocation(handler, activity, GeoUtils.UPDATE_POSITION);
+  }
+
+  public void getBusDetails() {
+    BusDAO.getBusStopByLine(handler, String.valueOf(bundle.getInt("busId")), bundle.getInt("busLine"));
+  }
+
+  private void createPolylines(List<RoutePoint> routePoints, int color) {
+    int routePointsSize = routePoints.size();
+    for (int j = 0; j < routePointsSize; j++) {
+      if (j < routePointsSize - 1) {
+        createSinglePolyline(routePoints.get(j).getCoords(), routePoints.get(j + 1).getCoords(), color);
+      }
+    }
+  }
+
+  public void createSinglePolyline(LatLng first, LatLng second, int color) {
+    Polyline line = map.addPolyline(new PolylineOptions()
+      .add(first, second)
+      .width(15)
+      .geodesic(true)
+      .startCap(new RoundCap())
+      .jointType(JointType.ROUND)
+      .color(activity.getColor(color)));
   }
 
   public void setListeners() {
@@ -115,7 +157,6 @@ public class MapService {
             mapBusAdapter.setBusDelayColor(R.color.error);
           }
 
-
           if (isMarkerInfoOpened.get()) {
             marker.hideInfoWindow();
             isMarkerInfoOpened.set(false);
@@ -126,26 +167,11 @@ public class MapService {
           break;
         case MarkerTag.TYPE_BUSSTOP:
           BusStop busStop = (BusStop) tag.getObject();
-          MapScheduleAdapter mapScheduleAdapter = new MapScheduleAdapter(activity);
-          map.setInfoWindowAdapter(mapScheduleAdapter);
+          BusDAO.getBusStopInfo(handler, busStop.getId(), marker, busStop);
+
+          mapScheduleAdapter = new MapScheduleAdapter(activity);
           map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-
-          Call<Departues> call = RetrofitXmlClient.getInstance().getMPKService().getSchedule(String.valueOf(busStop.getId()));
-          call.enqueue(new Callback<Departues>() {
-            @Override
-            public void onResponse(Call<Departues> call, Response<Departues> response) {
-              Departues departues = response.body();
-              mapScheduleAdapter.setDepartues(departues.getDepartueList());
-              mapScheduleAdapter.setBusStopName(busStop.getName());
-
-              marker.showInfoWindow();
-            }
-
-            @Override
-            public void onFailure(Call<Departues> call, Throwable t) {
-              AlertUtils.alert(activity, activity.getString(R.string.error_download_shedule));
-            }
-          });
+          map.setInfoWindowAdapter(mapScheduleAdapter);
           break;
         case MarkerTag.TYPE_BUSSTOPEND:
           break;
@@ -163,10 +189,15 @@ public class MapService {
     });
   }
 
+  public void setBusStopInfo(BusStopInfoMapBox busStopInfoMapBox) {
+    mapScheduleAdapter.setDepartues(busStopInfoMapBox.getDepartues().getDepartueList());
+    mapScheduleAdapter.setBusStopName(busStopInfoMapBox.getBusStop().getName());
+    busStopInfoMapBox.getMarker().showInfoWindow();
+  }
+
   public void showBusStops() {
-    List<BusStop> busStops = DatabaseUtils.getDatabase(mapService.getActivity()).dbBusStopDAO().getAll();
-    for (BusStop busStop : busStops) {
-      if( busStop.getIdCity() != 1) {
+    for (BusStop busStop : DatabaseUtils.getDatabase(mapService.getActivity()).dbBusStopDAO().getAll()) {
+      if (busStop.getIdCity() != 1) {
         createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_ZONE);
       } else {
         createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_CITY);
@@ -174,46 +205,78 @@ public class MapService {
     }
   }
 
-  public void refreshMap() {
-    Log.i("TEST", "Refreshing...");
-    getBusDetails();
-  }
-
-  public void stopRefreshingMap() {
-    autoRefresh.stopRefreshing();
-  }
-
-  public void getBusDetails() {
-    BusDAO.getBusStopByLine(handler, String.valueOf(bundle.getInt("busId")), bundle.getInt("busLine"));
+  public void showTracks(JsonArray jsonArray) {
+    List<BusStop> busStops = BusStopDAO.parseRouteBusStops(jsonArray.get(0).getAsJsonArray());
+    List<RouteHolder> routeHolders = RouteDAO.parsePolylines(jsonArray.get(2).getAsJsonArray());
+    List<RouteWariant> routeWariants = RouteDAO.parseRouteWariants(jsonArray.get(3).getAsJsonArray());
+    int getPointOnTrackSize;
+    int trackColor = 0;
+    RouteHolder routeHolder;
+    BusStop busStop;
+    for (RouteWariant routeWariant : routeWariants) {
+      if (routeWariant.getWariantId() == bundle.getInt("wariantId")) {
+        getPointOnTrackSize = routeWariant.getPointsOnTrack().size();
+        for (int i = 0; i < getPointOnTrackSize; i++) {
+          routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
+          busStop = busStops.get(routeWariant.getBusOnTrack().get(i));
+          if (i == getPointOnTrackSize - 1) {
+            MarkerService markerEndTrack = new MarkerService(
+              map,
+              routeHolder.getPoints().get(routeHolder.getPoints().size() - 1).getCoords(),
+              0,
+              BitmapDescriptorFactory.fromResource(R.drawable.ic_buspoint_red),
+              new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOPEND),
+              true
+            );
+          } else if (busStop.getIdCity() != 0) {
+            if (i == 0) {
+              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
+            } else {
+              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_ZONE);
+            }
+            trackColor = R.color.color_zone;
+          } else {
+            if (i == 0) {
+              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
+            } else {
+              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_CITY);
+            }
+            trackColor = R.color.color_city;
+          }
+          createPolylines(routeHolder.getPoints(), trackColor);
+        }
+        break;
+      }
+    }
   }
 
   private void showBusDetails(List<Object> vehicles) {
     boolean isTarget = true;
+    Vehicle mainVehicle = null;
     if (cameraStatus.get(0)) {
       isTarget = false;
       busPosition = new MarkerService(map, new LatLng(0, 0), 10, null, false);
       busDirection = new MarkerService(map, new LatLng(0, 0), 10, null, true);
     }
 
-    Vehicle mainVehicle = null;
-
     for (Object object : vehicles) {
       Vehicle vehicle = (Vehicle) object;
       mainVehicle = vehicle;
-      Bitmap bitmap;
-      int icon = R.drawable.vh_arrow;
       if (!vehicle.getNumerLini().equals("")) {
-        bitmap = ImageUtils.createBusPinImage(activity, vehicle.getNumerLini());
+        busDirection.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_arrow));
+        busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(
+          ImageUtils.createBusPinImage(activity, vehicle.getNumerLini())));
       } else {
-        bitmap = ImageUtils.createLongBusPinImage(activity, vehicle.getNastNumLini(), String.valueOf(vehicle.getIleSekDoOdjazdu()));
-        icon = R.drawable.vh_clock;
+        busDirection.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_clock));
+        busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(ImageUtils.createLongBusPinImage(
+          activity,
+          vehicle.getNastNumLini(),
+          String.valueOf(vehicle.getIleSekDoOdjazdu()))));
       }
 
       busPosition.setTag(new MarkerTag(vehicle, MarkerTag.TYPE_BUSPIN));
-      busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(bitmap));
       busPosition.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
-      busDirection.setIcon(BitmapDescriptorFactory.fromResource(icon));
       busDirection.setTag(new MarkerTag(vehicle, MarkerTag.TYPE_BUSCOMPASS));
       busDirection.setRotation(vehicle.getWektor());
       busDirection.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
@@ -229,33 +292,31 @@ public class MapService {
     }
   }
 
-  public void setCameraMovingStatus(boolean status) {
-    cameraStatus.clear();
-    cameraStatus.add(status);
-  }
-
-
   public void getTrack() {
-    Route route = DatabaseUtils.getDatabase(activity).dbRoutesDAO().getRouteByBusLine(bundle.getInt("busLine"));
-    BusDAO.getBusTrackByLine(handler, String.valueOf(route.getId()), String.valueOf(bundle.getInt("busLine")));
+    int busLine = bundle.getInt("busLine");
+    Route route = DatabaseUtils.getDatabase(activity).dbRoutesDAO().getRouteByBusLine(busLine);
+    BusDAO.getBusTrackByLine(handler, String.valueOf(route.getId()), String.valueOf(busLine));
   }
 
   public void setSearchTrack(List<SearchResultPoint> searchResultPoints) {
     int searchResultPointsSize = searchResultPoints.size();
+    SearchResultPoint searchResultPoint;
+    SearchResultPoint prevSearchResultPoint = null;
+    SearchResultPoint nextSearchResultPoint = null;
+    List<RoutePoint> routePoints;
+
+    BusStop busStop;
     for (int i = 0; i < searchResultPointsSize; i++) {
-      SearchResultPoint searchResultPoint = searchResultPoints.get(i);
-      SearchResultPoint prevSearchResultPoint = null;
-      SearchResultPoint nextSearchResultPoint = null;
+      searchResultPoint = searchResultPoints.get(i);
+      routePoints = searchResultPoint.getPoints();
+      busStop = new BusStop(searchResultPoint);
+
       if (i != 0) {
         prevSearchResultPoint = searchResultPoints.get(i - 1);
       }
       if (i != searchResultPointsSize - 1) {
         nextSearchResultPoint = searchResultPoints.get(i + 1);
       }
-
-      List<RoutePoint> routePoints = searchResultPoint.getPoints();
-      BusStop busStop = new BusStop(searchResultPoint);
-
 
       if (searchResultPoint.getBusStopId() == 0) {
         if (i == 0) {
@@ -283,21 +344,21 @@ public class MapService {
       }
 
       if (searchResultPoint.isChangeBus() && searchResultPoint.getBusStopId() != 0) {
-        MarkerService markerEndTrack = new MarkerService(
+        new MarkerService(
           map,
           new LatLng(searchResultPoint.getLng(), searchResultPoint.getLat()),
           1,
           BitmapDescriptorFactory.fromBitmap(ImageUtils.createBusChangeImage(activity, searchResultPoint.getBusLine())),
-          new MarkerTag(null, MarkerTag.TYPE_BUSSTOPEND),
+          new MarkerTag(null, MarkerTag.TYPE_ICON),
           false
         );
 
-        MarkerService markerChangeBus = new MarkerService(
+        new MarkerService(
           map,
           new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()),
           1,
           BitmapDescriptorFactory.fromResource(R.drawable.tp_walk),
-          new MarkerTag(null, MarkerTag.TYPE_BUSSTOPEND),
+          new MarkerTag(null, MarkerTag.TYPE_ICON),
           false
         );
 
@@ -308,11 +369,13 @@ public class MapService {
 
   public void createBusStopMarkerOnMap(BusStop busStop, int type) {
     int icon = 0;
+    int tagId = MarkerTag.TYPE_BUSSTOP;
 
     if (type == MapService.MARKER_BUSSTOP_START) {
       icon = R.drawable.ic_buspoint_green;
     } else if (type == MapService.MARKER_BUSSTOP_END) {
       icon = R.drawable.ic_buspoint_red;
+      tagId = MarkerTag.TYPE_ICON;
     } else if (busStop.getIdCity() != 0 && type == MapService.MARKER_BUSSTOP_TRACK) {
       icon = R.drawable.ic_buspoint_yellow;
     } else {
@@ -324,79 +387,12 @@ public class MapService {
       new LatLng(busStop.getLongitude(), busStop.getLatitude()),
       0,
       BitmapDescriptorFactory.fromResource(icon),
-      null,
+      new MarkerTag(busStop, tagId),
       true
     );
-    if (busStop != null) {
-      markerEndTrack.setTag(new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOP));
-    }
   }
 
 
-  public void showTracks(JsonArray jsonArray) {
-    List<BusStop> busStops = BusStopDAO.parseRouteBusStops(jsonArray.get(0).getAsJsonArray());
-    List<RouteHolder> routeHolders = RouteDAO.parsePolylines(jsonArray.get(2).getAsJsonArray());
-    List<RouteWariant> routeWariants = RouteDAO.parseRouteWariants(jsonArray.get(3).getAsJsonArray());
-    int getPointOnTrackSize;
-    int trackColor = 0;
-    for (RouteWariant routeWariant : routeWariants) {
-      if (routeWariant.getWariantId() == bundle.getInt("wariantId")) {
-        getPointOnTrackSize = routeWariant.getPointsOnTrack().size();
-        for (int i = 0; i < getPointOnTrackSize; i++) {
-          RouteHolder routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
-          BusStop busStop = busStops.get(routeWariant.getBusOnTrack().get(i));
-          if (i == getPointOnTrackSize - 1) {
-            MarkerService markerEndTrack = new MarkerService(
-              map,
-              routeHolder.getPoints().get(routeHolder.getPoints().size() - 1).getCoords(),
-              0,
-              BitmapDescriptorFactory.fromResource(R.drawable.ic_buspoint_red),
-              new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOPEND),
-              true
-            );
-          } else if (busStop.getIdCity() != 0) {
-            if( i == 0 ) {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
-            } else {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_ZONE);
-            }
-            trackColor = R.color.color_zone;
-          } else  {
-            if( i == 0 ) {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
-            } else {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_CITY);
-            }
-            trackColor = R.color.color_city;
-          }
-          createPolylines(routeHolder.getPoints(), trackColor);
-        }
-        break;
-      }
-    }
-  }
-
-  private void createPolylines(List<RoutePoint> routePoints, int color) {
-    for (int j = 0; j < routePoints.size(); j++) {
-      if (j < routePoints.size() - 1) {
-        createSinglePolyline(routePoints.get(j).getCoords(), routePoints.get(j + 1).getCoords(), color);
-      }
-    }
-  }
-
-  public void createSinglePolyline(LatLng first, LatLng second, int color) {
-    Polyline line = map.addPolyline(new PolylineOptions()
-      .add(first, second)
-      .width(15)
-      .geodesic(true)
-      .startCap(new RoundCap())
-      .jointType(JointType.ROUND)
-      .color(activity.getColor(color)));
-  }
-
-  public void showCurrentLocation() {
-    GeoUtils.getCurrentLocation(handler, activity, GeoUtils.UPDATE_POSITION);
-  }
 
   @SuppressLint("HandlerLeak")
   private Handler handler = new Handler() {
@@ -410,12 +406,11 @@ public class MapService {
           MainActivity.lng_current = pos.longitude;
           break;
         case GeoUtils.UPDATE_POSITION:
-          Log.i("TEST", "CREATE POSITION MARKER");
           new MarkerService(
             map,
             new LatLng(MainActivity.lat_current, MainActivity.lng_current),
             0,
-            BitmapDescriptorFactory.fromBitmap(ImageUtils.createYourPositionPin(activity, "Tu jesteś")),
+            BitmapDescriptorFactory.fromBitmap(ImageUtils.createYourPositionPin(activity, activity.getText(R.string.you_are_here).toString())),
             null,
             false);
           break;
@@ -427,6 +422,9 @@ public class MapService {
 
         case BusDAO.BUS_TRACK_BY_LINE:
           showTracks((JsonArray) msg.obj);
+          break;
+        case BusDAO.BUS_STOP_DETAILS:
+          setBusStopInfo((BusStopInfoMapBox) msg.obj);
           break;
       }
     }

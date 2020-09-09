@@ -12,7 +12,7 @@ public class MathUtils {
 
   public double roundTwoDecimals(double d) {
     DecimalFormat twoDForm = new DecimalFormat("#.#######");
-    return Double.valueOf(twoDForm.format(d));
+    return Double.parseDouble(twoDForm.format(d));
   }
 
   public static int calcDistanse(double lat1, double lng1, double lat2, double lng2) {

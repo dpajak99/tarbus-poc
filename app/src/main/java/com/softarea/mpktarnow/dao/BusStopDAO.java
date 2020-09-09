@@ -1,7 +1,5 @@
 package com.softarea.mpktarnow.dao;
 
-import android.util.Log;
-
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.RoutePoint;
@@ -39,7 +37,6 @@ public class BusStopDAO {
     List<SearchResult> searchResults = new ArrayList<>();
     try {
       JSONArray resultWariants = new JSONArray(connection.getJson());
-      Log.i("TEST", resultWariants.toString());
       for (int i = 0; i < resultWariants.length(); i++) {
         JSONObject searchResult = resultWariants.getJSONObject(i);
         JSONArray searchData = searchResult.optJSONArray("data");
@@ -50,6 +47,7 @@ public class BusStopDAO {
 
           JSONArray searchPoint = searchData.getJSONArray(j);
           JSONArray routePoints = searchPoint.getJSONArray(8);
+
           routePointsList.add(new RoutePoint(searchPoint.getDouble(2), searchPoint.getDouble(3)));
           for( int k = 0; k < routePoints.length(); k++ ) {
             JSONObject jsonRoutePoint = routePoints.getJSONObject(k);

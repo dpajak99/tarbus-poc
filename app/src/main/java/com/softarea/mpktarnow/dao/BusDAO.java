@@ -4,7 +4,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.Marker;
 import com.google.gson.JsonArray;
+import com.softarea.mpktarnow.model.BusStop;
+import com.softarea.mpktarnow.model.BusStopInfoMapBox;
+import com.softarea.mpktarnow.model.Departues;
 import com.softarea.mpktarnow.model.ListMediator;
 import com.softarea.mpktarnow.model.VehiclesList;
 import com.softarea.mpktarnow.services.RetrofitJsonClient;
@@ -20,6 +24,8 @@ import retrofit2.Response;
 public class BusDAO {
   public static final int BUS_STOP_BY_LINE = 20;
   public static final int BUS_TRACK_BY_LINE = 21;
+  public static final int BUS_STOP_DETAILS = 22;
+
   public static void getBusStopByLine( Handler handler, String busId, int busLine) {
     if (busId.equals("0")) {
       busId = "";
@@ -59,6 +65,23 @@ public class BusDAO {
       @Override
       public void onFailure(Call<JsonArray> call, Throwable t) {
         Log.i("TEST", "DeserializeFromXML - onFailure : " + t.toString());
+      }
+    });
+  }
+
+  public static void getBusStopInfo(Handler handler, int id, Marker marker, BusStop busStop) {
+    Call<Departues> call = RetrofitXmlClient.getInstance().getMPKService().getSchedule(String.valueOf(id));
+    call.enqueue(new Callback<Departues>() {
+      @Override
+      public void onResponse(Call<Departues> call, Response<Departues> response) {
+        Departues departues = response.body();
+        BusStopInfoMapBox busStopInfoMapBox = new BusStopInfoMapBox(departues, marker, busStop);
+        sendMessageToUi(handler, BUS_STOP_DETAILS, busStopInfoMapBox);
+      }
+
+      @Override
+      public void onFailure(Call<Departues> call, Throwable t) {
+        //AlertUtils.alert(activity, activity.getString(R.string.error_download_shedule));
       }
     });
   }
