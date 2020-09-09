@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
@@ -25,6 +26,8 @@ public class ResultRouteBusStopsAdapter extends RecyclerView.Adapter<ResultRoute
   private List<SearchResultPoint> searchResults = new ArrayList<>();
   private Context context;
   private FragmentActivity activity;
+  private List<SearchResultPoint> foundedSearchResultPoints = new ArrayList<>();
+
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public LinearLayout layoutBusSection;
@@ -34,15 +37,23 @@ public class ResultRouteBusStopsAdapter extends RecyclerView.Adapter<ResultRoute
     public TextView tvWalkTime;
     public TextView tvRouteDepartue;
     public TextView tvRouteLine;
+
     public ImageView icoBusPoint;
     public TextView tvBusStopName;
     public TextView tvBusStopArrive;
+
+    public RecyclerView busStopsAll;
+    public SearchBusListAdapter searchBusListAdapter;
 
     public ViewHolder(@NonNull View itemView) {
       super(itemView);
       layoutBusSection = itemView.findViewById(R.id.route_list_bus_section);
       layoutWalkSection = itemView.findViewById(R.id.route_list_walk_section);
       busDetails = itemView.findViewById(R.id.busDetails);
+
+      busStopsAll = itemView.findViewById(R.id.bus_stops_all);
+
+
 
       tvWalkTime = itemView.findViewById(R.id.walk_time);
       tvWalkDestination = itemView.findViewById(R.id.walk_destination);
@@ -74,6 +85,7 @@ public class ResultRouteBusStopsAdapter extends RecyclerView.Adapter<ResultRoute
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
     SearchResultPoint searchResult = searchResults.get(position);
+
     if (searchResult.getBusLine().length() == 0 || (searchResult.getBusLine().length() != 0 && searchResult.isChangeBus())) {
       holder.layoutWalkSection.setVisibility(View.VISIBLE);
 
@@ -100,11 +112,21 @@ public class ResultRouteBusStopsAdapter extends RecyclerView.Adapter<ResultRoute
         holder.tvBusStopName.setText(searchResult.getBusStopName());
         holder.icoBusPoint.setImageResource(R.drawable.bs_point_start);
         holder.tvBusStopArrive.setText(TimeUtils.sec2HHMM(searchResult.getTimeInSec1())); //to jest okej
+
       } else if ( (position < getItemCount()-1 && searchResults.get(position + 1).isChangeBus()) || position + 1 == getItemCount() - 1 ) {
+        holder.searchBusListAdapter = new SearchBusListAdapter();
+        holder.busStopsAll.setHasFixedSize(true);
+        holder.busStopsAll.setLayoutManager(new LinearLayoutManager(activity));
+        holder.busStopsAll.setAdapter(holder.searchBusListAdapter);
+        holder.searchBusListAdapter.update(foundedSearchResultPoints);
+        foundedSearchResultPoints.clear();
+
         holder.layoutBusSection.setVisibility(View.VISIBLE);
         holder.icoBusPoint.setImageResource(R.drawable.bs_point_end);
         holder.tvBusStopName.setText(searchResult.getBusStopName());
         holder.tvBusStopArrive.setText(TimeUtils.sec2HHMM(searchResult.getTimeInSec1())); //to jest okej
+      } else {
+        foundedSearchResultPoints.add(searchResult);
       }
     }
   }

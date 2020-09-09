@@ -1,7 +1,7 @@
 package com.softarea.mpktarnow.adapters;
 
 import android.content.Context;
-import android.util.Log;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +10,17 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
+import com.softarea.mpktarnow.activities.MainActivity;
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
+import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.utils.StringUtils;
+import com.softarea.mpktarnow.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +34,13 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public RecyclerView foundRoute;
     public RecyclerView foundRouteList;
-
+    public TextView tvRouteTime;
     public View showRoute;
     public boolean isClicked;
+
+
+    private String startTime;
+    private String endTime;
 
     public TextView busStops;
     public LinearLayout goToMap;
@@ -44,7 +52,7 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
       super(itemView);
       foundRoute = itemView.findViewById(R.id.tv_found_route);
       foundRouteList = itemView.findViewById(R.id.rv_found_route_list);
-
+      tvRouteTime = itemView.findViewById(R.id.route_time);
       showRoute = itemView.findViewById(R.id.show_route);
       isClicked = false;
       goToMap = itemView.findViewById(R.id.go_to_map);
@@ -75,8 +83,15 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
     track.add(-1);
 
     String busStopsList = "";
+
     for (int i = 0; i < searchResult.getData().size(); i++) {
       SearchResultPoint searchResultPoint = searchResult.getData().get(i);
+      if( i == 1 ) {
+        holder.startTime = TimeUtils.sec2HHMM(searchResultPoint.getTimeInSec1());
+      } else if( i == searchResult.getData().size() - 2) {
+        holder.endTime = TimeUtils.sec2HHMM(searchResultPoint.getTimeInSec1());
+        holder.tvRouteTime.setText( holder.startTime + " - " + holder.endTime);
+      }
       busStopsList = StringUtils.join(busStopsList, searchResultPoint.getBusStopName(), "\n");
       if (searchResultPoint.isEnterBus()) {
         if (i == 1) {
@@ -90,14 +105,6 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
       }
     }
 
-    /*holder.goToMap.setOnClickListener(view -> {
-      Bundle result = new Bundle();
-      result.putInt("key", MapService.BUNDLE_SEARCH_CONNECTION);
-      MainActivity.searchConnectionList = searchResult.getData();
-      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
-    });*/
-
-
     holder.busStops.setText(busStopsList);
 
     holder.resultRouteLineAdapter = new ResultRouteLineAdapter();
@@ -110,10 +117,9 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
     holder.foundRouteList.setHasFixedSize(true);
     holder.foundRouteList.setLayoutManager(new LinearLayoutManager(activity));
     holder.foundRouteList.setAdapter(holder.resultRouteBusStopsAdapter);
-    Log.i("TEST", "Size: " + searchResult.getData().size());
     holder.resultRouteBusStopsAdapter.update(searchResult.getData());
 
-    holder.showRoute.setOnClickListener(view -> {
+    holder.goToMap.setOnClickListener(view -> {
       if (!holder.isClicked) {
         holder.foundRouteList.setVisibility(View.VISIBLE);
         holder.isClicked = true;
@@ -122,6 +128,14 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
         holder.isClicked = false;
       }
     });
+
+    holder.showRoute.setOnClickListener(view -> {
+      Bundle result = new Bundle();
+      result.putInt("key", MapService.BUNDLE_SEARCH_CONNECTION);
+      MainActivity.searchConnectionList = searchResult.getData();
+      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
+    });
+
   }
 
   @Override

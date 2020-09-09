@@ -69,7 +69,10 @@
                 android:textColor="@color/success"
                 android:textStyle="bold"/>
         </LinearLayout>
-
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bus_stops_all"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -92,11 +95,10 @@
                 android:id="@+id/busstop_arrive"
                 android:layout_width="match_parent"
                 android:layout_gravity="center_vertical"
+                android:textStyle="bold"
                 android:gravity="end"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-
-      
     </LinearLayout>
 
 </LinearLayout>
