@@ -1,7 +1,6 @@
 package com.softarea.mpktarnow.adapters;
 
 import android.content.Context;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +10,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
-import com.softarea.mpktarnow.activities.MainActivity;
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
-import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -34,6 +30,10 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public RecyclerView foundRoute;
     public RecyclerView foundRouteList;
+
+    public View showRoute;
+    public boolean isClicked;
+
     public TextView busStops;
     public LinearLayout goToMap;
     public ResultRouteLineAdapter resultRouteLineAdapter;
@@ -44,6 +44,9 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
       super(itemView);
       foundRoute = itemView.findViewById(R.id.tv_found_route);
       foundRouteList = itemView.findViewById(R.id.rv_found_route_list);
+
+      showRoute = itemView.findViewById(R.id.show_route);
+      isClicked = false;
       goToMap = itemView.findViewById(R.id.go_to_map);
       busStops = itemView.findViewById(R.id.tv_bus_stops);
     }
@@ -87,12 +90,13 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
       }
     }
 
-    holder.goToMap.setOnClickListener(view -> {
+    /*holder.goToMap.setOnClickListener(view -> {
       Bundle result = new Bundle();
       result.putInt("key", MapService.BUNDLE_SEARCH_CONNECTION);
       MainActivity.searchConnectionList = searchResult.getData();
       Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
-    });
+    });*/
+
 
     holder.busStops.setText(busStopsList);
 
@@ -108,6 +112,16 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
     holder.foundRouteList.setAdapter(holder.resultRouteBusStopsAdapter);
     Log.i("TEST", "Size: " + searchResult.getData().size());
     holder.resultRouteBusStopsAdapter.update(searchResult.getData());
+
+    holder.showRoute.setOnClickListener(view -> {
+      if (!holder.isClicked) {
+        holder.foundRouteList.setVisibility(View.VISIBLE);
+        holder.isClicked = true;
+      } else {
+        holder.foundRouteList.setVisibility(View.GONE);
+        holder.isClicked = false;
+      }
+    });
   }
 
   @Override

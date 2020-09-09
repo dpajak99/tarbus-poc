@@ -13,4 +13,7 @@
     <string name="you_are_here">Tutaj jesteś</string>
     <string name="departue">Odjazd</string>
     <string name="arrival">Przyjazd</string>
+    <string name="meters">metrów</string>
+    <string name="to_your_destination">do Twojego celu</string>
+    <string name="to">do</string>
 </resources>

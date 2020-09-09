@@ -7,21 +7,33 @@
     <LinearLayout
         android:id="@+id/go_to_map"
         android:layout_width="match_parent"
-        android:background="#ff0000"
-        android:layout_height="200dp">
+        android:layout_height="100dp"
+        android:background="@color/color_zone">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/tv_found_route"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/background_rounded_corners_blue"
-            android:padding="5dp" />
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tv_found_route"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_rounded_corners_blue"
+                android:padding="5dp" />
+
+            <View
+                android:id="@+id/show_route"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </FrameLayout>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_found_route_list"
         android:layout_width="match_parent"
+        android:animateLayoutChanges="true"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         android:padding="5dp" />
 
     <TextView
