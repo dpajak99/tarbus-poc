@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.Navigation;
@@ -370,13 +371,13 @@ public class MapService {
   public void createBusStopMarkerOnMap(BusStop busStop, int type) {
     int icon = 0;
     int tagId = MarkerTag.TYPE_BUSSTOP;
-
+    Log.i("TEST", "IdCity: " + busStop.getIdCity() + " | type + " + type);
     if (type == MapService.MARKER_BUSSTOP_START) {
       icon = R.drawable.ic_buspoint_green;
     } else if (type == MapService.MARKER_BUSSTOP_END) {
       icon = R.drawable.ic_buspoint_red;
       tagId = MarkerTag.TYPE_ICON;
-    } else if (busStop.getIdCity() != 0 && type == MapService.MARKER_BUSSTOP_TRACK) {
+    } else if ((busStop.getIdCity() != 0 && type == MapService.MARKER_BUSSTOP_TRACK) || type == MapService.MARKER_BUSSTOP_ZONE ){
       icon = R.drawable.ic_buspoint_yellow;
     } else {
       icon = R.drawable.ic_buspoint;

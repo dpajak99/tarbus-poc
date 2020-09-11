@@ -34,4 +34,11 @@
         android:name="com.softarea.mpktarnow.ui.MapFragment"
         android:label="@string/title_map"
         tools:layout="@layout/fragment_map" />
+
+    <fragment
+        android:id="@+id/navigation_near"
+        android:name="com.softarea.mpktarnow.ui.NearFragment"
+        android:label="@string/title_near"
+        tools:layout="@layout/fragment_near" />
+
 </navigation>
