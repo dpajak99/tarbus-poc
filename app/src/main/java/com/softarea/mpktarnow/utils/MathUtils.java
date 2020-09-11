@@ -16,6 +16,7 @@ public class MathUtils {
   }
 
   public static int calcDistanse(double lat1, double lng1, double lat2, double lng2) {
+
     double earthRadius = 6371000; //meters
     double dLat = Math.toRadians(lat2-lat1);
     double dLng = Math.toRadians(lng2-lng1);
@@ -26,5 +27,14 @@ public class MathUtils {
     double dist = (double) (earthRadius * c);
 
     return (int) dist;
+  }
+
+  public static double calcBearing(double lat1, double lon1, double lat2, double lon2) {
+
+    double longDiff = lon2 - lon1;
+    double y = Math.sin(longDiff) * Math.cos(lat2);
+    double x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(longDiff);
+
+    return (Math.toDegrees(Math.atan2(y, x)) + 360) % 360;
   }
 }

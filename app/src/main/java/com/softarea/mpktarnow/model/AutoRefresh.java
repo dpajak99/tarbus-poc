@@ -10,7 +10,7 @@ public abstract class AutoRefresh {
 
   public AutoRefresh( ) {
     e = Executors.newSingleThreadScheduledExecutor();
-    e.scheduleAtFixedRate(this::refreshFunction, 0, 10, TimeUnit.SECONDS);
+    e.scheduleAtFixedRate(this::refreshFunction, 0, 1, TimeUnit.SECONDS);
   }
 
   public void stopRefreshing() {
