@@ -1,4 +1,4 @@
-package com.softarea.mpktarnow.dao;
+package com.softarea.mpktarnow.data.remote.dao;
 
 import android.os.Handler;
 import android.os.Message;
@@ -8,9 +8,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.BusStopInfoMapBox;
-import com.softarea.mpktarnow.model.Departues;
+import com.softarea.mpktarnow.data.remote.model.Departues;
 import com.softarea.mpktarnow.model.ListMediator;
-import com.softarea.mpktarnow.model.VehiclesList;
+import com.softarea.mpktarnow.data.remote.model.VehiclesList;
 import com.softarea.mpktarnow.services.RetrofitJsonClient;
 import com.softarea.mpktarnow.services.RetrofitXmlClient;
 

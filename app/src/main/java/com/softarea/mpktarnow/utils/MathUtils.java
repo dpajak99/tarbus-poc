@@ -1,18 +1,11 @@
 package com.softarea.mpktarnow.utils;
 
-import java.text.DecimalFormat;
-
 public class MathUtils {
   public static int makePositive( int value ) {
     if(value < 0 ) {
       return value * -1;
     }
     return value;
-  }
-
-  public double roundTwoDecimals(double d) {
-    DecimalFormat twoDForm = new DecimalFormat("#.#######");
-    return Double.parseDouble(twoDForm.format(d));
   }
 
   public static int calcDistanse(double lat1, double lng1, double lat2, double lng2) {

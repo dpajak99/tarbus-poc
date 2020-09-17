@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 import com.softarea.mpktarnow.R;
-import com.softarea.mpktarnow.model.Departue;
+import com.softarea.mpktarnow.data.remote.model.Departue;
 
 import java.util.ArrayList;
 import java.util.List;

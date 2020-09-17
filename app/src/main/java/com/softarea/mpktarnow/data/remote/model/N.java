@@ -1,4 +1,4 @@
-package com.softarea.mpktarnow.model;
+package com.softarea.mpktarnow.data.remote.model;
 
 import com.tickaroo.tikxml.annotation.Xml;
 

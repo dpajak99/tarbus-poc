@@ -1,14 +1,13 @@
-package com.softarea.mpktarnow.dao;
+package com.softarea.mpktarnow.data.remote.dao;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.google.android.gms.maps.model.Marker;
 import com.google.gson.JsonArray;
-import com.softarea.mpktarnow.database.AppDatabase;
+import com.softarea.mpktarnow.data.database.AppDatabase;
+import com.softarea.mpktarnow.data.remote.model.Departues;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.City;
-import com.softarea.mpktarnow.model.Departues;
 import com.softarea.mpktarnow.model.Route;
 import com.softarea.mpktarnow.model.Vehicle;
 import com.softarea.mpktarnow.services.RetrofitJsonClient;
@@ -43,10 +42,6 @@ public class MpkDAO {
         Log.i("TEST", "DeserializeFromXML - onFailure : " + t.toString());
       }
     });
-  }
-
-  public static void getAndUpdateMapBusStopDetails(Marker marker, int id) {
-
   }
 
   public static void getAndSaveCities(Context context) {

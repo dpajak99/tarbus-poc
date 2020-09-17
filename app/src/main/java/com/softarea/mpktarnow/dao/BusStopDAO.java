@@ -3,7 +3,7 @@ package com.softarea.mpktarnow.dao;
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.RoutePoint;
-import com.softarea.mpktarnow.model.SearchConnectionCallback;
+import com.softarea.mpktarnow.data.remote.model.SearchConnectionCallback;
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
 import com.softarea.mpktarnow.utils.StringUtils;

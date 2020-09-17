@@ -4,7 +4,7 @@ import android.content.Context;
 
 import androidx.room.Room;
 
-import com.softarea.mpktarnow.database.AppDatabase;
+import com.softarea.mpktarnow.data.database.AppDatabase;
 
 public class DatabaseUtils {
   public static AppDatabase getDatabase(Context context ) {

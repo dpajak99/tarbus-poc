@@ -4,13 +4,11 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentActivity;
-import androidx.navigation.Navigation;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -23,51 +21,48 @@ import com.google.android.gms.maps.model.RoundCap;
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.activities.MainActivity;
-import com.softarea.mpktarnow.adapters.MapBusAdapter;
-import com.softarea.mpktarnow.adapters.MapScheduleAdapter;
-import com.softarea.mpktarnow.dao.BusDAO;
+import com.softarea.mpktarnow.data.remote.dao.BusDAO;
 import com.softarea.mpktarnow.dao.BusStopDAO;
 import com.softarea.mpktarnow.dao.RouteDAO;
 import com.softarea.mpktarnow.model.BusStop;
-import com.softarea.mpktarnow.model.BusStopInfoMapBox;
 import com.softarea.mpktarnow.model.ListMediator;
-import com.softarea.mpktarnow.model.MarkerTag;
 import com.softarea.mpktarnow.model.Route;
 import com.softarea.mpktarnow.model.RouteHolder;
 import com.softarea.mpktarnow.model.RoutePoint;
 import com.softarea.mpktarnow.model.RouteWariant;
 import com.softarea.mpktarnow.model.SearchResultPoint;
 import com.softarea.mpktarnow.model.Vehicle;
+import com.softarea.mpktarnow.model.marker.BusChangeMarker;
+import com.softarea.mpktarnow.model.marker.BusDirectionMarker;
+import com.softarea.mpktarnow.model.marker.BusMarker;
+import com.softarea.mpktarnow.model.marker.BusStopMarker;
+import com.softarea.mpktarnow.model.marker.MainMarker;
+import com.softarea.mpktarnow.model.marker.WalkMarker;
 import com.softarea.mpktarnow.utils.DatabaseUtils;
 import com.softarea.mpktarnow.utils.GeoUtils;
 import com.softarea.mpktarnow.utils.ImageUtils;
-import com.softarea.mpktarnow.utils.MathUtils;
-import com.softarea.mpktarnow.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MapService {
-  private static final int MARKER_BUSSTOP_START = 0;
-  private static final int MARKER_BUSSTOP_END = 1;
-  private static final int MARKER_BUSSTOP_CITY = 2;
-  private static final int MARKER_BUSSTOP_ZONE = 3;
-  private static final int MARKER_BUSSTOP_TRACK = 4;
+  public static final int MARKER_BUSSTOP_START = 0;
+  public static final int MARKER_BUSSTOP_END = 1;
+  public static final int MARKER_BUSSTOP_CITY = 2;
+  public static final int MARKER_BUSSTOP_ZONE = 3;
+  public static final int MARKER_BUSSTOP_TRACK = 4;
 
   public static final int BUNDLE_MAP_GET_FROM = 8;
   public static final int BUNDLE_MAP_GET_TO = 9;
 
-  private AtomicBoolean isMarkerInfoOpened = new AtomicBoolean(false);
   private GoogleMapService mapService;
   private GoogleMap map;
   private FragmentActivity activity;
   private Bundle bundle;
   private List<Boolean> cameraStatus = new ArrayList<>();
-  private MarkerService busPosition;
-  private MarkerService busDirection;
+
   private View view;
-  private MapScheduleAdapter mapScheduleAdapter;
+
 
   public MapService(GoogleMapService mapService, Bundle bundle) {
     this.mapService = mapService;
@@ -136,72 +131,17 @@ public class MapService {
 
   public void setListeners() {
     map.setOnInfoWindowClickListener(marker -> {
-      MarkerTag tag = (MarkerTag) marker.getTag();
-      switch (tag.getType()) {
-        case MarkerTag.TYPE_BUSSTOP:
-          BusStop busStop = (BusStop) tag.getObject();
-          if (busStop.getId() != 0) {
-            Bundle result = new Bundle();
-            result.putInt("id", busStop.getId());
-            Navigation.findNavController(mapService.getView()).navigate(R.id.navigation_bus_stop_details, result);
-          }
-          break;
-      }
+      MainMarker mainMarker = (MainMarker) marker.getTag();
+      mainMarker.onItemWindowClick();
     });
 
     mapService.getMap().setOnMarkerClickListener(marker -> {
-      MarkerTag tag = (MarkerTag) marker.getTag();
-      switch (tag.getType()) {
-        case MarkerTag.TYPE_BUSPIN:
-          Vehicle vehicle = (Vehicle) tag.getObject();
-          MapBusAdapter mapBusAdapter = new MapBusAdapter(activity);
-          map.setInfoWindowAdapter(mapBusAdapter);
-
-          mapBusAdapter.setBusDelayInfo(TimeUtils.calcDelayInfo(activity, vehicle.getOdchylenie()));
-          mapBusAdapter.setBusDelayValue(TimeUtils.calcDelayValue(vehicle.getOdchylenie()));
-          mapBusAdapter.setBusDestination(vehicle.getDestination());
-          if ((MathUtils.makePositive(vehicle.getOdchylenie()) / 60) < 4) {
-            mapBusAdapter.setBusDelayColor(R.color.success);
-          } else {
-            mapBusAdapter.setBusDelayColor(R.color.error);
-          }
-
-          if (isMarkerInfoOpened.get()) {
-            marker.hideInfoWindow();
-            isMarkerInfoOpened.set(false);
-          } else if (!isMarkerInfoOpened.get()) {
-            marker.showInfoWindow();
-            isMarkerInfoOpened.set(true);
-          }
-          break;
-        case MarkerTag.TYPE_BUSSTOP:
-          BusStop busStop = (BusStop) tag.getObject();
-          BusDAO.getBusStopInfo(handlerBusStopDetails, busStop.getId(), marker, busStop);
-
-          mapScheduleAdapter = new MapScheduleAdapter(activity);
-          map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
-          map.setInfoWindowAdapter(mapScheduleAdapter);
-          break;
-        case MarkerTag.TYPE_BUSSTOPEND:
-          break;
-        case MarkerTag.TYPE_BUSCOMPASS:
-          break;
-        default:
-          break;
-      }
-
-      return true;
+      MainMarker mainMarker = (MainMarker) marker.getTag();
+      mainMarker.onClick();
+       return true;
     });
 
-    mapService.getMap().setOnInfoWindowCloseListener(marker -> {
-      isMarkerInfoOpened.set(false);
-    });
-  }
 
-  public void setBusStopInfo(BusStopInfoMapBox busStopInfoMapBox) {
-    mapScheduleAdapter.setDepartues(busStopInfoMapBox.getDepartues().getDepartueList());
-    mapScheduleAdapter.setBusStopName(busStopInfoMapBox.getBusStop().getName());
-    busStopInfoMapBox.getMarker().showInfoWindow();
   }
 
   public void showBusStops() {
@@ -229,14 +169,7 @@ public class MapService {
           routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
           busStop = busStops.get(routeWariant.getBusOnTrack().get(i));
           if (i == getPointOnTrackSize - 1) {
-            MarkerService markerEndTrack = new MarkerService(
-              map,
-              routeHolder.getPoints().get(routeHolder.getPoints().size() - 1).getCoords(),
-              0,
-              BitmapDescriptorFactory.fromResource(R.drawable.ic_buspoint_red),
-              new MarkerTag(busStop, MarkerTag.TYPE_BUSSTOPEND),
-              true
-            );
+            new BusStopMarker(view, activity, map, routeHolder.getPoints().get(routeHolder.getPoints().size() - 1).getCoords(), MapService.MARKER_BUSSTOP_END, busStop);
           } else if (busStop.getIdCity() != 0) {
             if (i == 0) {
               createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
@@ -259,39 +192,40 @@ public class MapService {
     }
   }
 
+  private MainMarker busPosition;
+  private MainMarker busDirection;
   private void showBusDetails(List<Vehicle> vehicles) {
-    Log.i("TEST", "getBusDetails: dupa2");
     boolean isTarget = true;
     Vehicle mainVehicle = null;
+
     if (cameraStatus.get(0)) {
       isTarget = false;
-      busPosition = new MarkerService(map, new LatLng(0, 0), 10, null, false);
-      busDirection = new MarkerService(map, new LatLng(0, 0), 10, null, true);
+      busPosition = new BusMarker(activity, map, new LatLng(0, 0));
+      busDirection = new BusDirectionMarker(map, new LatLng(0, 0));
     }
 
     for (Vehicle vehicle : vehicles) {
       mainVehicle = vehicle;
       if (!vehicle.getNumerLini().equals("")) {
-        busDirection.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_arrow));
-        busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(
+        busDirection.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_arrow));
+        busPosition.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(
           ImageUtils.createBusPinImage(activity, vehicle.getNumerLini())));
       } else {
-        busDirection.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_clock));
-        busPosition.setIcon(BitmapDescriptorFactory.fromBitmap(ImageUtils.createLongBusPinImage(
+        busDirection.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_clock));
+        busPosition.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(ImageUtils.createLongBusPinImage(
           activity,
           vehicle.getNastNumLini(),
           String.valueOf(vehicle.getIleSekDoOdjazdu()))));
       }
 
-      busPosition.setTag(new MarkerTag(vehicle, MarkerTag.TYPE_BUSPIN));
-      busPosition.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
+      busPosition.getMarker().setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
+      busPosition.setObject(vehicle);
 
-      busDirection.setTag(new MarkerTag(vehicle, MarkerTag.TYPE_BUSCOMPASS));
-      busDirection.setRotation(vehicle.getWektor());
-      busDirection.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
+      busDirection.getMarker().setRotation(vehicle.getWektor());
+      busDirection.getMarker().setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
 
-      if (isMarkerInfoOpened.get()) {
-        busPosition.showInfoWindow();
+      if (busPosition.isOpen()) {
+        busPosition.getMarker().showInfoWindow();
       }
     }
 
@@ -353,23 +287,9 @@ public class MapService {
       }
 
       if (searchResultPoint.isChangeBus() && searchResultPoint.getBusStopId() != 0) {
-        new MarkerService(
-          map,
-          new LatLng(searchResultPoint.getLng(), searchResultPoint.getLat()),
-          1,
-          BitmapDescriptorFactory.fromBitmap(ImageUtils.createBusChangeImage(activity, searchResultPoint.getBusLine())),
-          new MarkerTag(null, MarkerTag.TYPE_ICON),
-          false
-        );
 
-        new MarkerService(
-          map,
-          new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()),
-          1,
-          BitmapDescriptorFactory.fromResource(R.drawable.tp_walk),
-          new MarkerTag(null, MarkerTag.TYPE_ICON),
-          false
-        );
+        new BusChangeMarker(activity, map, new LatLng(searchResultPoint.getLng(), searchResultPoint.getLat()), searchResultPoint.getBusLine());
+        new WalkMarker(activity, map,  new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()));
 
         createSinglePolyline(new LatLng(searchResultPoint.getLng(), searchResultPoint.getLat()), new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()), R.color.error);
       }
@@ -377,28 +297,7 @@ public class MapService {
   }
 
   public void createBusStopMarkerOnMap(BusStop busStop, int type) {
-    int icon = 0;
-    int tagId = MarkerTag.TYPE_BUSSTOP;
-    Log.i("TEST", "IdCity: " + busStop.getIdCity() + " | type + " + type);
-    if (type == MapService.MARKER_BUSSTOP_START) {
-      icon = R.drawable.ic_buspoint_green;
-    } else if (type == MapService.MARKER_BUSSTOP_END) {
-      icon = R.drawable.ic_buspoint_red;
-      tagId = MarkerTag.TYPE_ICON;
-    } else if ((busStop.getIdCity() != 0 && type == MapService.MARKER_BUSSTOP_TRACK) || type == MapService.MARKER_BUSSTOP_ZONE ){
-      icon = R.drawable.ic_buspoint_yellow;
-    } else {
-      icon = R.drawable.ic_buspoint;
-    }
-
-    new MarkerService(
-      map,
-      new LatLng(busStop.getLongitude(), busStop.getLatitude()),
-      0,
-      BitmapDescriptorFactory.fromResource(icon),
-      new MarkerTag(busStop, tagId),
-      true
-    );
+    new BusStopMarker(view, activity, map, new LatLng(busStop.getLongitude(), busStop.getLatitude()), type, busStop);
   }
 
   //STATUS_CURRENT_POSITION
@@ -439,12 +338,5 @@ public class MapService {
     }
   };
 
-  //BUS_STOP_DETAILS
-  @SuppressLint("HandlerLeak")
-  private final Handler handlerBusStopDetails = new Handler() {
-    @Override
-    public void handleMessage(Message msg) {
-      setBusStopInfo((BusStopInfoMapBox) msg.obj);
-    }
-  };
+
 }
