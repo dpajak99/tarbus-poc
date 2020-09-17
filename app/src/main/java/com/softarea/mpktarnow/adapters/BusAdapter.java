@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.model.Departue;
-import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.utils.ListUtils;
 import com.softarea.mpktarnow.utils.StringUtils;
 
@@ -74,12 +73,11 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
     holder.busDepartueTime.setText(StringUtils.replaceHTML(departue.getTime()));
     holder.contentHolder.setOnClickListener(view -> {
       Bundle result = new Bundle();
-      result.putInt("key", MapService.BUNDLE_BUS_DETAILS);
       result.putInt("busLine", departue.getBusLine());
       result.putInt("busId", departue.getBusId());
       result.putInt("wariantId", departue.getWariantId());
       result.putString("routeId", String.valueOf(departue.getId()));
-      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
+      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_bus_details_map, result);
     });
   }
 

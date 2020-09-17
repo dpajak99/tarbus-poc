@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.fragment.app.FragmentActivity;
 import androidx.navigation.Navigation;
@@ -25,7 +28,6 @@ import com.softarea.mpktarnow.adapters.MapScheduleAdapter;
 import com.softarea.mpktarnow.dao.BusDAO;
 import com.softarea.mpktarnow.dao.BusStopDAO;
 import com.softarea.mpktarnow.dao.RouteDAO;
-import com.softarea.mpktarnow.model.AutoRefresh;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.BusStopInfoMapBox;
 import com.softarea.mpktarnow.model.ListMediator;
@@ -53,9 +55,6 @@ public class MapService {
   private static final int MARKER_BUSSTOP_ZONE = 3;
   private static final int MARKER_BUSSTOP_TRACK = 4;
 
-  public static final int BUNDLE_BUS_DETAILS = 5;
-  public static final int BUNDLE_BUS_STOP_LIST = 6;
-  public static final int BUNDLE_SEARCH_CONNECTION = 7;
   public static final int BUNDLE_MAP_GET_FROM = 8;
   public static final int BUNDLE_MAP_GET_TO = 9;
 
@@ -67,7 +66,7 @@ public class MapService {
   private List<Boolean> cameraStatus = new ArrayList<>();
   private MarkerService busPosition;
   private MarkerService busDirection;
-  private AutoRefresh autoRefresh;
+  private View view;
   private MapScheduleAdapter mapScheduleAdapter;
 
   public MapService(GoogleMapService mapService, Bundle bundle) {
@@ -75,23 +74,8 @@ public class MapService {
     this.map = mapService.getMap();
     this.activity = mapService.getActivity();
     this.bundle = bundle;
+    this.view = mapService.getView();
     setCameraMovingStatus(true);
-    autoRefresh = new AutoRefresh() {
-      @Override
-      public void refreshFunction() {
-        refreshMap();
-      }
-    };
-  }
-
-  public void refreshMap() {
-    if (bundle.getInt( "key" ) == MapService.BUNDLE_BUS_DETAILS) {
-      getBusDetails();
-    }
-  }
-
-  public void stopRefreshingMap() {
-    autoRefresh.stopRefreshing();
   }
 
   public void setCameraMovingStatus(boolean status) {
@@ -99,12 +83,16 @@ public class MapService {
     cameraStatus.add(status);
   }
 
+  public void moveCamera( LatLng latLng ) {
+    map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+  }
+
   public void showCurrentLocation() {
-    GeoUtils.getCurrentLocation(handler, activity, GeoUtils.UPDATE_POSITION);
+    GeoUtils.getCurrentLocation(handlerCurrentPosition, activity);
   }
 
   public void getBusDetails() {
-    BusDAO.getBusStopByLine(handler, String.valueOf(bundle.getInt("busId")), bundle.getInt("busLine"));
+    BusDAO.getBusStopByLine(handlerBusStopByLine, String.valueOf(bundle.getInt("busId")), bundle.getInt("busLine"));
   }
 
   private void createPolylines(List<RoutePoint> routePoints, int color) {
@@ -124,6 +112,26 @@ public class MapService {
       .startCap(new RoundCap())
       .jointType(JointType.ROUND)
       .color(activity.getColor(color)));
+  }
+
+  public void setCurrentCoords() {
+    LinearLayout boxInfo = view.findViewById(R.id.info_box);
+    TextView viewFinder = view.findViewById(R.id.tv_viewfinder);
+    boxInfo.setVisibility(View.VISIBLE);
+    viewFinder.setVisibility(View.VISIBLE);
+    TextView cameraCoordsValue = view.findViewById(R.id.tv_camera_position);
+    map.setOnCameraMoveListener(() -> {
+
+      LatLng position = map.getCameraPosition().target;
+      if (bundle.getInt("key") == MapService.BUNDLE_MAP_GET_FROM ) {
+        MainActivity.lng_from = position.longitude;
+        MainActivity.lat_from = position.latitude;
+      } else {
+        MainActivity.lng_to = position.longitude;
+        MainActivity.lat_to = position.latitude;
+      }
+      cameraCoordsValue.setText(position.latitude + " " + position.longitude);
+    });
   }
 
   public void setListeners() {
@@ -168,7 +176,7 @@ public class MapService {
           break;
         case MarkerTag.TYPE_BUSSTOP:
           BusStop busStop = (BusStop) tag.getObject();
-          BusDAO.getBusStopInfo(handler, busStop.getId(), marker, busStop);
+          BusDAO.getBusStopInfo(handlerBusStopDetails, busStop.getId(), marker, busStop);
 
           mapScheduleAdapter = new MapScheduleAdapter(activity);
           map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()));
@@ -251,7 +259,8 @@ public class MapService {
     }
   }
 
-  private void showBusDetails(List<Object> vehicles) {
+  private void showBusDetails(List<Vehicle> vehicles) {
+    Log.i("TEST", "getBusDetails: dupa2");
     boolean isTarget = true;
     Vehicle mainVehicle = null;
     if (cameraStatus.get(0)) {
@@ -260,8 +269,7 @@ public class MapService {
       busDirection = new MarkerService(map, new LatLng(0, 0), 10, null, true);
     }
 
-    for (Object object : vehicles) {
-      Vehicle vehicle = (Vehicle) object;
+    for (Vehicle vehicle : vehicles) {
       mainVehicle = vehicle;
       if (!vehicle.getNumerLini().equals("")) {
         busDirection.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_arrow));
@@ -296,7 +304,7 @@ public class MapService {
   public void getTrack() {
     int busLine = bundle.getInt("busLine");
     Route route = DatabaseUtils.getDatabase(activity).dbRoutesDAO().getRouteByBusLine(busLine);
-    BusDAO.getBusTrackByLine(handler, String.valueOf(route.getId()), String.valueOf(busLine));
+    BusDAO.getBusTrackByLine(handlerBusTrackByLine, String.valueOf(route.getId()), String.valueOf(busLine));
   }
 
   public void setSearchTrack(List<SearchResultPoint> searchResultPoints) {
@@ -383,7 +391,7 @@ public class MapService {
       icon = R.drawable.ic_buspoint;
     }
 
-    MarkerService markerEndTrack = new MarkerService(
+    new MarkerService(
       map,
       new LatLng(busStop.getLongitude(), busStop.getLatitude()),
       0,
@@ -393,41 +401,50 @@ public class MapService {
     );
   }
 
-
-
+  //STATUS_CURRENT_POSITION
   @SuppressLint("HandlerLeak")
-  private Handler handler = new Handler() {
+  private final Handler handlerCurrentPosition = new Handler() {
     @Override
     public void handleMessage(Message msg) {
-      super.handleMessage(msg);
-      switch (msg.what) {
-        case GeoUtils.STATUS_CURRENT_POSITION:
-          LatLng pos = (LatLng) msg.obj;
-          MainActivity.lat_current = pos.latitude;
-          MainActivity.lng_current = pos.longitude;
-          break;
-        case GeoUtils.UPDATE_POSITION:
-          new MarkerService(
-            map,
-            new LatLng(MainActivity.lat_current, MainActivity.lng_current),
-            0,
-            BitmapDescriptorFactory.fromBitmap(ImageUtils.createYourPositionPin(activity, activity.getText(R.string.you_are_here).toString())),
-            null,
-            false);
-          break;
+      LatLng pos = (LatLng) msg.obj;
+      MainActivity.lat_current = pos.latitude;
+      MainActivity.lng_current = pos.longitude;
 
-        case BusDAO.BUS_STOP_BY_LINE:
-          ListMediator listMediator = (ListMediator) msg.obj;
-          showBusDetails(listMediator.getObjectList());
-          break;
+      new MarkerService(
+        map,
+        new LatLng(MainActivity.lat_current, MainActivity.lng_current),
+        0,
+        BitmapDescriptorFactory.fromBitmap(ImageUtils.createYourPositionPin(activity, activity.getText(R.string.you_are_here).toString())),
+        null,
+        false);
+    }
+  };
 
-        case BusDAO.BUS_TRACK_BY_LINE:
-          showTracks((JsonArray) msg.obj);
-          break;
-        case BusDAO.BUS_STOP_DETAILS:
-          setBusStopInfo((BusStopInfoMapBox) msg.obj);
-          break;
-      }
+  //BUS_STOP_BY_LINE
+  @SuppressLint("HandlerLeak")
+  private final Handler handlerBusStopByLine = new Handler() {
+    @Override
+    public void handleMessage(Message msg) {
+      ListMediator<Vehicle> listMediator = (ListMediator<Vehicle>) msg.obj;
+      showBusDetails(listMediator.getObjectList());
+    }
+  };
+
+  //BUS_TRACK_BY_LINE
+  @SuppressLint("HandlerLeak")
+  private final Handler handlerBusTrackByLine = new Handler() {
+    @Override
+    public void handleMessage(Message msg) {
+      showTracks((JsonArray) msg.obj);
+    }
+  };
+
+  //BUS_STOP_DETAILS
+  @SuppressLint("HandlerLeak")
+  private final Handler handlerBusStopDetails = new Handler() {
+    @Override
+    public void handleMessage(Message msg) {
+      setBusStopInfo((BusStopInfoMapBox) msg.obj);
     }
   };
 }

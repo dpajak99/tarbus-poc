@@ -22,11 +22,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class BusDAO {
-  public static final int BUS_STOP_BY_LINE = 20;
-  public static final int BUS_TRACK_BY_LINE = 21;
-  public static final int BUS_STOP_DETAILS = 22;
-
   public static void getBusStopByLine( Handler handler, String busId, int busLine) {
+    Log.i("TEST", "getBusStopByLine: start");
     if (busId.equals("0")) {
       busId = "";
     }
@@ -37,12 +34,13 @@ public class BusDAO {
     call.enqueue(new Callback<VehiclesList>() {
       @Override
       public void onResponse(Call<VehiclesList> call, Response<VehiclesList> response) {
+        Log.i("TEST", "getBusStopByLine: onResponse");
         if (!response.headers().get("content-length").equals("15")) {
           VehiclesList jsonVehicles = response.body();
           for (int i = 0; i < jsonVehicles.getJsonVehicles().size(); i++) {
             vehicles.add(MpkDAO.parseJsonToVehicle(jsonVehicles.getJsonVehicles().get(i).getContent()));
           }
-          sendMessageToUi(handler, BusDAO.BUS_STOP_BY_LINE, new ListMediator(vehicles));
+          sendMessageToUi(handler, new ListMediator(vehicles));
         }
       }
 
@@ -59,7 +57,7 @@ public class BusDAO {
       @Override
       public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
         JsonArray jsonArray = response.body();
-        sendMessageToUi(handler, BusDAO.BUS_TRACK_BY_LINE, jsonArray);
+        sendMessageToUi(handler, jsonArray);
       }
 
       @Override
@@ -76,7 +74,7 @@ public class BusDAO {
       public void onResponse(Call<Departues> call, Response<Departues> response) {
         Departues departues = response.body();
         BusStopInfoMapBox busStopInfoMapBox = new BusStopInfoMapBox(departues, marker, busStop);
-        sendMessageToUi(handler, BUS_STOP_DETAILS, busStopInfoMapBox);
+        sendMessageToUi(handler, busStopInfoMapBox);
       }
 
       @Override
@@ -86,9 +84,9 @@ public class BusDAO {
     });
   }
 
-  private static void sendMessageToUi(Handler handler, int what, Object s) {
+  private static void sendMessageToUi(Handler handler, Object s) {
+    Log.i("TEST", "sendMessageToUi: sendMessageToUi");
     Message message = handler.obtainMessage();
-    message.what = what;
     message.obj = s;
     handler.sendMessage(message);
   }

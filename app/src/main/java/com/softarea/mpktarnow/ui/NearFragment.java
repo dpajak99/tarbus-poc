@@ -1,7 +1,6 @@
 package com.softarea.mpktarnow.ui;
 
 import android.annotation.SuppressLint;
-import android.hardware.GeomagneticField;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -30,30 +29,23 @@ import java.util.List;
 public class NearFragment extends Fragment {
   NearBusStopAdapter nearBusStopAdapter;
   List<BusStop> busStops;
-  GeomagneticField geoField;
-
-  private LinearLayoutManager llm;
-  private float currentDegree = 0f;
-
 
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
     View root = inflater.inflate(R.layout.fragment_near, container, false);
 
-    llm = new LinearLayoutManager(getActivity());
     RecyclerView nearBusStopList = root.findViewById(R.id.list_nearest_busstops);
     nearBusStopAdapter = new NearBusStopAdapter(getActivity());
     nearBusStopList.setHasFixedSize(true);
-    nearBusStopList.setLayoutManager(llm);
+    nearBusStopList.setLayoutManager(new LinearLayoutManager(getActivity()));
     nearBusStopList.setAdapter(nearBusStopAdapter);
 
     busStops = DatabaseUtils.getDatabase(getContext()).dbBusStopDAO().getAll();
 
-    GeoUtils.getCurrentLocation(handler, getContext(), GeoUtils.STATUS_CURRENT_POSITION);
+    GeoUtils.getCurrentLocation(handlerCurrentPosition, getContext());
 
     return root;
   }
-
 
 
   @Override
@@ -80,20 +72,16 @@ public class NearFragment extends Fragment {
   }
 
 
+  //STATUS_CURRENT_POSITION
   @SuppressLint("HandlerLeak")
-  private Handler handler = new Handler() {
+  private final Handler handlerCurrentPosition = new Handler() {
     @Override
     public void handleMessage(Message msg) {
-      super.handleMessage(msg);
-      switch (msg.what) {
-        case GeoUtils.STATUS_CURRENT_POSITION:
-          LatLng pos = (LatLng) msg.obj;
-          MainActivity.lat_current = pos.latitude;
-          MainActivity.lng_current = pos.longitude;
+      LatLng pos = (LatLng) msg.obj;
+      MainActivity.lat_current = pos.latitude;
+      MainActivity.lng_current = pos.longitude;
 
-          showNearestBusStops();
-          break;
-      }
+      showNearestBusStops();
     }
   };
 }

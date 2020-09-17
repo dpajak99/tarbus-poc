@@ -30,15 +30,33 @@
         tools:layout="@layout/fragment_bus_stop_details" />
 
     <fragment
-        android:id="@+id/navigation_map"
-        android:name="com.softarea.mpktarnow.ui.MapFragment"
-        android:label="@string/title_map"
-        tools:layout="@layout/fragment_map" />
-
-    <fragment
         android:id="@+id/navigation_near"
         android:name="com.softarea.mpktarnow.ui.NearFragment"
         android:label="@string/title_near"
         tools:layout="@layout/fragment_near" />
+
+    <fragment
+        android:id="@+id/navigation_busstop_list_map"
+        android:name="com.softarea.mpktarnow.ui.map.BusStopListMapFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_map" />
+
+    <fragment
+        android:id="@+id/navigation_bus_details_map"
+        android:name="com.softarea.mpktarnow.ui.map.BusDetailsMapFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_map" />
+
+    <fragment
+        android:id="@+id/navigation_get_coords_map"
+        android:name="com.softarea.mpktarnow.ui.map.GetCoordsMapFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_map" />
+
+    <fragment
+        android:id="@+id/navigation_search_connection_map"
+        android:name="com.softarea.mpktarnow.ui.map.SearchConnectionMapFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_map" />
 
 </navigation>
