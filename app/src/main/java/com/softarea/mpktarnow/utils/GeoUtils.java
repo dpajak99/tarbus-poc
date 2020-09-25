@@ -17,17 +17,14 @@ import java.util.List;
 import java.util.Locale;
 
 public class GeoUtils {
-  public static final int STATUS_CURRENT_POSITION = 0;
-  public static final int UPDATE_POSITION = 1;
-
-  public static String getPlaceFromCoords(Handler handler, Context context, LatLng coords ) throws IOException {
+  public static String getPlaceFromCoords(Context context, LatLng coords ) throws IOException {
     Geocoder geocoder = new Geocoder(context, Locale.getDefault());
     List<Address> addresses = geocoder.getFromLocation(coords.latitude, coords.longitude, 1);
     return addresses.get(0).getAddressLine(0);
   }
 
   @SuppressLint("MissingPermission")
-  public static void getCurrentLocation(Handler handler, Context context, int status ) {
+  public static void getCurrentLocation(Handler handler, Context context) {
     FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
     if (PermissionUtils.checkPermissions(context)) {
     }
@@ -35,8 +32,7 @@ public class GeoUtils {
       fusedLocationClient.getLastLocation()
         .addOnSuccessListener(location -> {
           if (location != null) {
-            sendMessageToUi(handler, GeoUtils.STATUS_CURRENT_POSITION, new LatLng(location.getLatitude(), location.getLongitude()));
-            sendMessageToUi(handler, status, new LatLng(location.getLatitude(), location.getLongitude()));
+            sendMessageToUi(handler, new LatLng(location.getLatitude(), location.getLongitude()));
           } else {
             Log.i("TEST", "Location is null");
           }
@@ -46,9 +42,8 @@ public class GeoUtils {
     }
   }
 
-  private static void sendMessageToUi(Handler handler, int what, Object s) {
+  private static void sendMessageToUi(Handler handler, Object s) {
     Message message = handler.obtainMessage();
-    message.what = what;
     message.obj = s;
     handler.sendMessage(message);
   }

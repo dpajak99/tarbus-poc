@@ -14,7 +14,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
-import com.softarea.mpktarnow.model.BusStop;
+import com.softarea.mpktarnow.model.db.BusStopListItem;
 import com.softarea.mpktarnow.model.NearBusStop;
 import com.softarea.mpktarnow.utils.ListUtils;
 
@@ -63,7 +63,7 @@ public class NearBusStopAdapter extends RecyclerView.Adapter<NearBusStopAdapter.
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
     NearBusStop nearBusStop = nearBusStopsSorted.get(position);
-    BusStop busStop = nearBusStop.getBusStop();
+    BusStopListItem busStop = nearBusStop.getBusStop();
 
     holder.name.setText(busStop.getName());
     holder.tvMeters.setText(nearBusStop.getMeters() + "m");

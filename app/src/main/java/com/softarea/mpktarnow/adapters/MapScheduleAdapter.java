@@ -10,14 +10,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 import com.softarea.mpktarnow.R;
-import com.softarea.mpktarnow.model.Departue;
+import com.softarea.mpktarnow.data.remote.model.RemoteDepartue;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MapScheduleAdapter implements GoogleMap.InfoWindowAdapter {
 
-  private List<Departue> departues = new ArrayList<>();
+  private List<RemoteDepartue> remoteDepartues = new ArrayList<>();
   private String busStopName;
   private FragmentActivity activity;
 
@@ -45,16 +45,16 @@ public class MapScheduleAdapter implements GoogleMap.InfoWindowAdapter {
     recyclerView.setLayoutManager(new GridLayoutManager(activity, 4));
     recyclerView.setAdapter(busAdapter);
 
-    busAdapter.update(departues);
+    busAdapter.update(remoteDepartues);
     return v;
   }
 
-  public void setDepartues(List<Departue> departues) {
-    this.departues = departues;
+  public void setRemoteDepartues(List<RemoteDepartue> remoteDepartues) {
+    this.remoteDepartues = remoteDepartues;
   }
 
-  public List<Departue> getDepartues() {
-    return departues;
+  public List<RemoteDepartue> getRemoteDepartues() {
+    return remoteDepartues;
   }
 
   public void setBusStopName(String busStopName) {

@@ -209,4 +209,11 @@ public class Vehicle {
   public int getWektor() {
     return wektor;
   }
+
+  public boolean isSetNumerLinii() {
+    if(getNumerLini().equals("")) {
+      return false;
+    }
+    return true;
+  }
 }
