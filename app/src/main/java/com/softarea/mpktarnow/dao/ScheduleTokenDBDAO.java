@@ -4,7 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 
-import com.softarea.mpktarnow.database.model.ScheduleTokenDB;
+import com.softarea.mpktarnow.data.database.model.ScheduleTokenDB;
 
 @Dao
 public interface ScheduleTokenDBDAO {

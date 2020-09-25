@@ -1,9 +1,9 @@
 package com.softarea.mpktarnow.services;
 
 import com.google.gson.JsonArray;
-import com.softarea.mpktarnow.model.Departues;
-import com.softarea.mpktarnow.model.SearchConnectionCallback;
-import com.softarea.mpktarnow.model.VehiclesList;
+import com.softarea.mpktarnow.data.remote.model.Departues;
+import com.softarea.mpktarnow.data.remote.model.SearchConnectionCallback;
+import com.softarea.mpktarnow.data.remote.model.VehiclesList;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

@@ -31,8 +31,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public TextView name;
-    public TextView coordsH;
-    public TextView coordsV;
+    public TextView admin;
     public TextView id;
     public LinearLayout busStop;
 
@@ -40,8 +39,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
       super(itemView);
       id = itemView.findViewById(R.id.schedule_bus_stop_id);
       name = itemView.findViewById(R.id.schedule_bus_stop_name);
-      coordsH = itemView.findViewById(R.id.schedule_bus_coords_h);
-      coordsV = itemView.findViewById(R.id.schedule_bus_coords_v);
+      admin = itemView.findViewById(R.id.admin);
       busStop = itemView.findViewById(R.id.layout_bus_stop);
     }
   }
@@ -71,8 +69,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
     BusStop busStop= filteredData.get(position);
     holder.id.setText(String.valueOf(busStop.getId()));
     holder.name.setText(busStop.getName());
-    holder.coordsH.setText(String.valueOf(busStop.getLatitude()));
-    holder.coordsV.setText(String.valueOf(busStop.getLongitude()));
+    holder.admin.setText(busStop.toString());
 
     holder.busStop.setOnClickListener(view -> {
       Bundle result = new Bundle();

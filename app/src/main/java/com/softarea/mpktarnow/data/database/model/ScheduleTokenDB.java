@@ -1,4 +1,4 @@
-package com.softarea.mpktarnow.database.model;
+package com.softarea.mpktarnow.data.database.model;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

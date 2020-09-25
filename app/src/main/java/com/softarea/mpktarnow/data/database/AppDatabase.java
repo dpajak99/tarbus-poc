@@ -1,13 +1,13 @@
-package com.softarea.mpktarnow.database;
+package com.softarea.mpktarnow.data.database;
 
 import androidx.room.Database;
 import androidx.room.RoomDatabase;
 
 import com.softarea.mpktarnow.dao.ScheduleTokenDBDAO;
-import com.softarea.mpktarnow.database.dao.DbBusStopDAO;
-import com.softarea.mpktarnow.database.dao.DbCityDAO;
-import com.softarea.mpktarnow.database.dao.DbRouteDAO;
-import com.softarea.mpktarnow.database.model.ScheduleTokenDB;
+import com.softarea.mpktarnow.data.database.dao.DbBusStopDAO;
+import com.softarea.mpktarnow.data.database.dao.DbCityDAO;
+import com.softarea.mpktarnow.data.database.dao.DbRouteDAO;
+import com.softarea.mpktarnow.data.database.model.ScheduleTokenDB;
 import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.City;
 import com.softarea.mpktarnow.model.Route;

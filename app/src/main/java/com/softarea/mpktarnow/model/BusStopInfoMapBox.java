@@ -1,6 +1,7 @@
 package com.softarea.mpktarnow.model;
 
 import com.google.android.gms.maps.model.Marker;
+import com.softarea.mpktarnow.data.remote.model.Departues;
 
 public class BusStopInfoMapBox {
   private Departues departues;

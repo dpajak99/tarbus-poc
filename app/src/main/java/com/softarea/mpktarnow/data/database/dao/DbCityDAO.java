@@ -1,4 +1,4 @@
-package com.softarea.mpktarnow.database.dao;
+package com.softarea.mpktarnow.data.database.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;

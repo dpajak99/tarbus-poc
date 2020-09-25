@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.SearchConnectionResultAdapter;
 import com.softarea.mpktarnow.dao.BusStopDAO;
-import com.softarea.mpktarnow.model.SearchConnectionCallback;
+import com.softarea.mpktarnow.data.remote.model.SearchConnectionCallback;
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.services.RetrofitXmlClient;
 import com.softarea.mpktarnow.utils.TimeUtils;
