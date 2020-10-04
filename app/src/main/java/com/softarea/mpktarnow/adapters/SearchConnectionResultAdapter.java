@@ -18,7 +18,6 @@ import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.activities.MainActivity;
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
-import com.softarea.mpktarnow.services.MapService;
 import com.softarea.mpktarnow.utils.StringUtils;
 import com.softarea.mpktarnow.utils.TimeUtils;
 
@@ -131,9 +130,8 @@ public class SearchConnectionResultAdapter extends RecyclerView.Adapter<SearchCo
 
     holder.showRoute.setOnClickListener(view -> {
       Bundle result = new Bundle();
-      result.putInt("key", MapService.BUNDLE_SEARCH_CONNECTION);
       MainActivity.searchConnectionList = searchResult.getData();
-      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_map, result);
+      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_search_connection_map, result);
     });
 
   }

@@ -14,14 +14,14 @@ public class SearchResultPoint {
   private String busLine;
   private String type;
   private List<RoutePoint> points;
-  private int zero1;
+  private int isCity;
   private int zero2;
   private int zero3;
   private int timeInSec1;
   private int timeInSec2;
   private String date;
 
-  public SearchResultPoint(int busStopId, String busStopName, double lat, double lng, boolean isEnterBus, boolean isChangeBus, String busLine, String type, List<RoutePoint> points, int zero1, int zero2, int zero3, int timeInSec1, int timeInSec2, String date) {
+  public SearchResultPoint(int busStopId, String busStopName, double lat, double lng, boolean isEnterBus, boolean isChangeBus, String busLine, String type, List<RoutePoint> points, int isCity, int zero2, int zero3, int timeInSec1, int timeInSec2, String date) {
     this.busStopId = busStopId;
     this.busStopName = busStopName;
     this.lat = lat;
@@ -31,7 +31,7 @@ public class SearchResultPoint {
     this.busLine = busLine;
     this.type = type;
     this.points = points;
-    this.zero1 = zero1;
+    this.isCity = isCity;
     this.zero2 = zero2;
     this.zero3 = zero3;
     this.timeInSec1 = timeInSec1;
@@ -51,7 +51,7 @@ public class SearchResultPoint {
       ", busLine='" + busLine + '\'' +
       ", type='" + type + '\'' +
       ", points=" + points +
-      ", zero1=" + zero1 +
+      ", zero1=" + isCity +
       ", zero2=" + zero2 +
       ", zero3=" + zero3 +
       ", timeInSec1=" + timeInSec1 +
@@ -100,8 +100,8 @@ public class SearchResultPoint {
     return points;
   }
 
-  public int getZero1() {
-    return zero1;
+  public int getIsCity() {
+    return isCity;
   }
 
   public int getZero2() {
