@@ -18,13 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.ScheduleAdapter;
-<<<<<<< HEAD
 import com.softarea.mpktarnow.model.db.BusStopListItem;
-=======
-import com.softarea.mpktarnow.data.remote.dao.MpkDAO;
-import com.softarea.mpktarnow.data.database.model.ScheduleTokenDB;
-import com.softarea.mpktarnow.model.BusStop;
->>>>>>> master
 import com.softarea.mpktarnow.utils.DatabaseUtils;
 
 import java.util.List;

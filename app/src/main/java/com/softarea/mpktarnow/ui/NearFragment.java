@@ -28,11 +28,7 @@ import java.util.List;
 
 public class NearFragment extends Fragment {
   NearBusStopAdapter nearBusStopAdapter;
-<<<<<<< HEAD
   List<BusStopListItem> busStops;
-=======
-  List<BusStop> busStops;
->>>>>>> master
 
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {

@@ -17,11 +17,7 @@ public class BusDetailsMapFragment extends MapFragment {
     setMapService(new MapService(new GoogleMapService(requireActivity(), getView(), googleMap), getBundle()));
 
     e = Executors.newSingleThreadScheduledExecutor();
-<<<<<<< HEAD
     e.scheduleAtFixedRate(this::refresh, 0, 5, TimeUnit.SECONDS);
-=======
-    e.scheduleAtFixedRate(this::refresh, 0, 1, TimeUnit.SECONDS);
->>>>>>> master
 
     this.mapService.getTrack();
   }

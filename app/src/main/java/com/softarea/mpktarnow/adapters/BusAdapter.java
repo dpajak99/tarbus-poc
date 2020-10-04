@@ -13,11 +13,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
-<<<<<<< HEAD
 import com.softarea.mpktarnow.model.DepartueItem;
-=======
-import com.softarea.mpktarnow.data.remote.model.Departue;
->>>>>>> master
 import com.softarea.mpktarnow.utils.ListUtils;
 import com.softarea.mpktarnow.utils.StringUtils;
 import com.softarea.mpktarnow.utils.TimeUtils;
@@ -84,16 +80,9 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
 
     holder.contentHolder.setOnClickListener(view -> {
       Bundle result = new Bundle();
-<<<<<<< HEAD
       result.putInt("busLine", departueItem.getBusLine());
       result.putInt("busId", departueItem.getBusId());
       result.putInt("wariantId", departueItem.getWariantId());
-=======
-      result.putInt("busLine", departue.getBusLine());
-      result.putInt("busId", departue.getBusId());
-      result.putInt("wariantId", departue.getWariantId());
-      result.putString("routeId", String.valueOf(departue.getId()));
->>>>>>> master
       Navigation.findNavController(holder.itemView).navigate(R.id.navigation_bus_details_map, result);
     });
   }

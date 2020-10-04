@@ -1,10 +1,6 @@
 package com.softarea.mpktarnow.utils;
 
-<<<<<<< HEAD
 import com.softarea.mpktarnow.model.DepartueItem;
-=======
-import com.softarea.mpktarnow.data.remote.model.Departue;
->>>>>>> master
 import com.softarea.mpktarnow.model.NearBusStop;
 
 import java.util.Comparator;

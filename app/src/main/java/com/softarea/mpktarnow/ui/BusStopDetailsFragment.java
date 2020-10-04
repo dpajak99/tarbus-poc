@@ -17,7 +17,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.BusAdapter;
-<<<<<<< HEAD
 import com.softarea.mpktarnow.data.remote.dao.BusDAO;
 import com.softarea.mpktarnow.data.remote.model.Departues;
 import com.softarea.mpktarnow.data.remote.model.RemoteDepartue;
@@ -28,9 +27,6 @@ import com.softarea.mpktarnow.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-=======
-import com.softarea.mpktarnow.data.remote.dao.MpkDAO;
->>>>>>> master
 
 public class BusStopDetailsFragment extends Fragment {
   private BusAdapter busAdapter;
