@@ -23,14 +23,4 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </LinearLayout>
-<<<<<<< HEAD
-
-    <TextView
-        android:id="@+id/admin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-
-=======
->>>>>>> helpme
 </LinearLayout>

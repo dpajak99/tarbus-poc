@@ -11,12 +11,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
-<<<<<<< HEAD
-import com.softarea.mpktarnow.data.remote.model.Departue;
-import com.softarea.mpktarnow.utils.ListUtils;
-=======
 import com.softarea.mpktarnow.data.remote.model.RemoteDepartue;
->>>>>>> helpme
 import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;

@@ -4,10 +4,6 @@ import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.data.remote.model.SearchConnectionCallback;
 import com.softarea.mpktarnow.model.BusStopMapItem;
 import com.softarea.mpktarnow.model.RoutePoint;
-<<<<<<< HEAD
-import com.softarea.mpktarnow.data.remote.model.SearchConnectionCallback;
-=======
->>>>>>> helpme
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
 import com.softarea.mpktarnow.utils.StringUtils;
