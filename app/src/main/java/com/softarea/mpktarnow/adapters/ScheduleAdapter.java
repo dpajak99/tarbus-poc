@@ -39,6 +39,10 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
       super(itemView);
       id = itemView.findViewById(R.id.schedule_bus_stop_id);
       name = itemView.findViewById(R.id.schedule_bus_stop_name);
+<<<<<<< HEAD
+=======
+      admin = itemView.findViewById(R.id.admin);
+>>>>>>> master
       busStop = itemView.findViewById(R.id.layout_bus_stop);
     }
   }
@@ -68,7 +72,11 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
     BusStopListItem busStop= filteredData.get(position);
     holder.id.setText(String.valueOf(busStop.getId()));
     holder.name.setText(busStop.getName());
+<<<<<<< HEAD
 
+=======
+    holder.admin.setText(busStop.toString());
+>>>>>>> master
 
     holder.busStop.setOnClickListener(view -> {
       Bundle result = new Bundle();
