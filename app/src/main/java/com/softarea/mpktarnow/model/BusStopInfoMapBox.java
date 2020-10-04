@@ -6,9 +6,9 @@ import com.softarea.mpktarnow.data.remote.model.Departues;
 public class BusStopInfoMapBox {
   private Departues departues;
   private Marker marker;
-  private BusStop busStop;
+  private BusStopMapItem busStop;
 
-  public BusStopInfoMapBox(Departues departues, Marker marker, BusStop busStop) {
+  public BusStopInfoMapBox(Departues departues, Marker marker, BusStopMapItem busStop) {
     this.departues = departues;
     this.marker = marker;
     this.busStop = busStop;
@@ -22,7 +22,7 @@ public class BusStopInfoMapBox {
     return marker;
   }
 
-  public BusStop getBusStop() {
+  public BusStopMapItem getBusStop() {
     return busStop;
   }
 }

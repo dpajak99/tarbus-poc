@@ -18,9 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.ScheduleAdapter;
-import com.softarea.mpktarnow.data.remote.dao.MpkDAO;
-import com.softarea.mpktarnow.data.database.model.ScheduleTokenDB;
-import com.softarea.mpktarnow.model.BusStop;
+import com.softarea.mpktarnow.model.db.BusStopListItem;
 import com.softarea.mpktarnow.utils.DatabaseUtils;
 
 import java.util.List;
@@ -29,6 +27,7 @@ import java.util.List;
 public class HomeFragment extends Fragment {
   public static ScheduleAdapter scheduleAdapter;
   public static ProgressDialog pd;
+
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
     View root = inflater.inflate(R.layout.fragment_home, container, false);
@@ -50,15 +49,8 @@ public class HomeFragment extends Fragment {
     scheduleList.setLayoutManager(new LinearLayoutManager(getActivity()));
     scheduleList.setAdapter(scheduleAdapter);
 
-    if(DatabaseUtils.getDatabase(getContext()).scheduleTokenDBDAO().getScheduleTokenCount() == 0 ) {
-      pd = new ProgressDialog(getContext());
-      MpkDAO.getAndSaveCities(getContext());
-
-      DatabaseUtils.getDatabase(getContext()).scheduleTokenDBDAO().setScheduleToken(new ScheduleTokenDB(0, 20));
-    } else {
-      List<BusStop> busStops = DatabaseUtils.getDatabase(getContext()).dbBusStopDAO().getAll();
-      scheduleAdapter.updateArticles(busStops);
-    }
+    List<BusStopListItem> busStops = DatabaseUtils.getDatabase(getContext()).dbBusStopDAO().getAll();
+    scheduleAdapter.updateArticles(busStops);
 
     SearchView searchView = root.findViewById(R.id.search_view);
     searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);

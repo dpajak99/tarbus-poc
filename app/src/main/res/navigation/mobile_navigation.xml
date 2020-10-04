@@ -58,5 +58,10 @@
         android:name="com.softarea.mpktarnow.ui.map.SearchConnectionMapFragment"
         android:label="@string/title_map"
         tools:layout="@layout/fragment_map" />
+    <fragment
+        android:id="@+id/navigation_slide_bus_stop"
+        android:name="com.softarea.mpktarnow.ui.SlideBusStopFragment"
+        android:label="@string/title_map"
+        tools:layout="@layout/fragment_slide_bus_stop" />
 
 </navigation>

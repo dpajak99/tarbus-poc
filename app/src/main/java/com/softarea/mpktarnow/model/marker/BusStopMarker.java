@@ -12,15 +12,13 @@ import androidx.navigation.Navigation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.adapters.MapScheduleAdapter;
 import com.softarea.mpktarnow.data.remote.dao.BusDAO;
-import com.softarea.mpktarnow.model.BusStop;
 import com.softarea.mpktarnow.model.BusStopInfoMapBox;
-import com.softarea.mpktarnow.services.MapService;
+import com.softarea.mpktarnow.model.BusStopMapItem;
 
 public class BusStopMarker implements MainMarker {
   private static final int MARKER_ZINDEX = 0;
@@ -30,17 +28,15 @@ public class BusStopMarker implements MainMarker {
   private GoogleMap map;
   private MapScheduleAdapter mapScheduleAdapter;
   private View view;
-  private int type;
   private boolean canOpen = true;
-  private BusStop busStop;
+  private BusStopMapItem busStop;
 
-  public BusStopMarker(View view, FragmentActivity activity, GoogleMap map, LatLng position, int type, BusStop busStop) {
+  public BusStopMarker(View view, FragmentActivity activity, GoogleMap map, BusStopMapItem busStop) {
     this.view = view;
     this.activity = activity;
     this.map = map;
-    this.type = type;
     this.marker = map.addMarker(new MarkerOptions()
-      .position(position)
+      .position(busStop.getPosition())
       .anchor(0.5f, 0.5f)
       .zIndex(MARKER_ZINDEX));
     this.busStop = busStop;
@@ -51,6 +47,9 @@ public class BusStopMarker implements MainMarker {
 
   @Override
   public void onClick() {
+    if(busStop.getId() == 0) {
+      canOpen = false;
+    }
     if (canOpen) {
       BusDAO.getBusStopInfo(handlerBusStopDetails, busStop.getId(), marker, busStop);
 
@@ -80,15 +79,12 @@ public class BusStopMarker implements MainMarker {
   }
 
   private int getBusStopPin() {
-    if (type == MapService.MARKER_BUSSTOP_START) {
-      return R.drawable.ic_buspoint_green;
-    } else if (type == MapService.MARKER_BUSSTOP_END) {
-      canOpen = false;
+    if (busStop.getId() == 0) {
       return R.drawable.ic_buspoint_red;
-    } else if ((busStop.getIdCity() != 0 && type == MapService.MARKER_BUSSTOP_TRACK) || type == MapService.MARKER_BUSSTOP_ZONE) {
-      return R.drawable.ic_buspoint_yellow;
-    } else {
+    } else if (busStop.getIsCity() == 0) {
       return R.drawable.ic_buspoint;
+    } else {
+      return R.drawable.ic_buspoint_yellow;
     }
   }
 
@@ -102,7 +98,7 @@ public class BusStopMarker implements MainMarker {
     @Override
     public void handleMessage(Message msg) {
       BusStopInfoMapBox busStopInfoMapBox = (BusStopInfoMapBox) msg.obj;
-      mapScheduleAdapter.setDepartues(busStopInfoMapBox.getDepartues().getDepartueList());
+      mapScheduleAdapter.setRemoteDepartues(busStopInfoMapBox.getDepartues().getDepartueList());
       mapScheduleAdapter.setBusStopName(busStopInfoMapBox.getBusStop().getName());
       busStopInfoMapBox.getMarker().showInfoWindow();
     }

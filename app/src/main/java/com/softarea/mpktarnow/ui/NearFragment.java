@@ -17,7 +17,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.activities.MainActivity;
 import com.softarea.mpktarnow.adapters.NearBusStopAdapter;
-import com.softarea.mpktarnow.model.BusStop;
+import com.softarea.mpktarnow.model.db.BusStopListItem;
 import com.softarea.mpktarnow.model.NearBusStop;
 import com.softarea.mpktarnow.utils.DatabaseUtils;
 import com.softarea.mpktarnow.utils.GeoUtils;
@@ -28,7 +28,7 @@ import java.util.List;
 
 public class NearFragment extends Fragment {
   NearBusStopAdapter nearBusStopAdapter;
-  List<BusStop> busStops;
+  List<BusStopListItem> busStops;
 
   public View onCreateView(@NonNull LayoutInflater inflater,
                            ViewGroup container, Bundle savedInstanceState) {
@@ -62,7 +62,7 @@ public class NearFragment extends Fragment {
   private void showNearestBusStops() {
     List<NearBusStop> nearBusStops = new ArrayList<>();
     nearBusStops.clear();
-    for (BusStop busStop : busStops) {
+    for (BusStopListItem busStop : busStops) {
       nearBusStops.add(new NearBusStop(
         MathUtils.calcDistanse(MainActivity.lat_current, MainActivity.lng_current, busStop.getLongitude(), busStop.getLatitude()),
         busStop
