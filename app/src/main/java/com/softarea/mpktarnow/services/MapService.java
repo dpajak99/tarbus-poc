@@ -4,8 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.FragmentActivity;
@@ -15,26 +15,25 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.gson.JsonArray;
 import com.softarea.mpktarnow.R;
 import com.softarea.mpktarnow.activities.MainActivity;
-import com.softarea.mpktarnow.data.remote.dao.BusDAO;
 import com.softarea.mpktarnow.dao.BusStopDAO;
 import com.softarea.mpktarnow.dao.RouteDAO;
-import com.softarea.mpktarnow.model.BusStop;
+import com.softarea.mpktarnow.data.remote.dao.BusDAO;
+import com.softarea.mpktarnow.model.BigBusMarker;
+import com.softarea.mpktarnow.model.BusStopMapItem;
 import com.softarea.mpktarnow.model.ListMediator;
-import com.softarea.mpktarnow.model.Route;
 import com.softarea.mpktarnow.model.RouteHolder;
 import com.softarea.mpktarnow.model.RoutePoint;
 import com.softarea.mpktarnow.model.RouteWariant;
 import com.softarea.mpktarnow.model.SearchResultPoint;
 import com.softarea.mpktarnow.model.Vehicle;
+import com.softarea.mpktarnow.model.db.BusStopListItem;
+import com.softarea.mpktarnow.model.db.Route;
 import com.softarea.mpktarnow.model.marker.BusChangeMarker;
-import com.softarea.mpktarnow.model.marker.BusDirectionMarker;
-import com.softarea.mpktarnow.model.marker.BusMarker;
 import com.softarea.mpktarnow.model.marker.BusStopMarker;
 import com.softarea.mpktarnow.model.marker.MainMarker;
 import com.softarea.mpktarnow.model.marker.WalkMarker;
@@ -46,12 +45,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MapService {
-  public static final int MARKER_BUSSTOP_START = 0;
-  public static final int MARKER_BUSSTOP_END = 1;
-  public static final int MARKER_BUSSTOP_CITY = 2;
-  public static final int MARKER_BUSSTOP_ZONE = 3;
-  public static final int MARKER_BUSSTOP_TRACK = 4;
-
   public static final int BUNDLE_MAP_GET_FROM = 8;
   public static final int BUNDLE_MAP_GET_TO = 9;
 
@@ -78,7 +71,7 @@ public class MapService {
     cameraStatus.add(status);
   }
 
-  public void moveCamera( LatLng latLng ) {
+  public void moveCamera(LatLng latLng) {
     map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
   }
 
@@ -87,20 +80,34 @@ public class MapService {
   }
 
   public void getBusDetails() {
-    BusDAO.getBusStopByLine(handlerBusStopByLine, String.valueOf(bundle.getInt("busId")), bundle.getInt("busLine"));
+    int intBusId = bundle.getInt("busId");
+    int intBusLine = bundle.getInt("busLine");
+
+    Log.i("TEST", "budId - " + intBusId + " | busLine: " + intBusLine);
+    String stringBusId = String.valueOf(intBusId);
+    String stringBusLine = String.valueOf(intBusLine);
+    if( intBusId == 0 ) {
+      stringBusId = "";
+    }
+
+    if( intBusLine == 0 ) {
+      stringBusLine = "";
+    }
+
+    BusDAO.getBusStopByLine(handlerBusStopByLine, stringBusId , stringBusLine);
   }
 
-  private void createPolylines(List<RoutePoint> routePoints, int color) {
+  private void drawPolylines(List<RoutePoint> routePoints, int color) {
     int routePointsSize = routePoints.size();
     for (int j = 0; j < routePointsSize; j++) {
       if (j < routePointsSize - 1) {
-        createSinglePolyline(routePoints.get(j).getCoords(), routePoints.get(j + 1).getCoords(), color);
+        drawSinglePolyline(routePoints.get(j).getCoords(), routePoints.get(j + 1).getCoords(), color);
       }
     }
   }
 
-  public void createSinglePolyline(LatLng first, LatLng second, int color) {
-    Polyline line = map.addPolyline(new PolylineOptions()
+  public void drawSinglePolyline(LatLng first, LatLng second, int color) {
+    map.addPolyline(new PolylineOptions()
       .add(first, second)
       .width(15)
       .geodesic(true)
@@ -110,15 +117,14 @@ public class MapService {
   }
 
   public void setCurrentCoords() {
-    LinearLayout boxInfo = view.findViewById(R.id.info_box);
-    TextView viewFinder = view.findViewById(R.id.tv_viewfinder);
-    boxInfo.setVisibility(View.VISIBLE);
-    viewFinder.setVisibility(View.VISIBLE);
+    view.findViewById(R.id.info_box).setVisibility(View.VISIBLE);
+    view.findViewById(R.id.tv_viewfinder).setVisibility(View.VISIBLE);
+
     TextView cameraCoordsValue = view.findViewById(R.id.tv_camera_position);
     map.setOnCameraMoveListener(() -> {
 
       LatLng position = map.getCameraPosition().target;
-      if (bundle.getInt("key") == MapService.BUNDLE_MAP_GET_FROM ) {
+      if (bundle.getInt("key") == MapService.BUNDLE_MAP_GET_FROM) {
         MainActivity.lng_from = position.longitude;
         MainActivity.lat_from = position.latitude;
       } else {
@@ -138,95 +144,89 @@ public class MapService {
     mapService.getMap().setOnMarkerClickListener(marker -> {
       MainMarker mainMarker = (MainMarker) marker.getTag();
       mainMarker.onClick();
-       return true;
+      return true;
     });
 
 
   }
 
   public void showBusStops() {
-    for (BusStop busStop : DatabaseUtils.getDatabase(mapService.getActivity()).dbBusStopDAO().getAll()) {
-      if (busStop.getIdCity() != 1) {
-        createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_ZONE);
-      } else {
-        createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_CITY);
-      }
+    for (BusStopListItem busStop : DatabaseUtils.getDatabase(mapService.getActivity()).dbBusStopDAO().getAll()) {
+      createBusStopMarkerOnMap(new BusStopMapItem(busStop));
     }
   }
 
   public void showTracks(JsonArray jsonArray) {
-    List<BusStop> busStops = BusStopDAO.parseRouteBusStops(jsonArray.get(0).getAsJsonArray());
+    BusStopMapItem busStop;
+
+    List<BusStopMapItem> busStops = BusStopDAO.parseRouteBusStops(jsonArray.get(0).getAsJsonArray());
     List<RouteHolder> routeHolders = RouteDAO.parsePolylines(jsonArray.get(2).getAsJsonArray());
     List<RouteWariant> routeWariants = RouteDAO.parseRouteWariants(jsonArray.get(3).getAsJsonArray());
-    int getPointOnTrackSize;
-    int trackColor = 0;
-    RouteHolder routeHolder;
-    BusStop busStop;
+
     for (RouteWariant routeWariant : routeWariants) {
       if (routeWariant.getWariantId() == bundle.getInt("wariantId")) {
-        getPointOnTrackSize = routeWariant.getPointsOnTrack().size();
+        int getPointOnTrackSize = routeWariant.getPointsOnTrack().size();
+
         for (int i = 0; i < getPointOnTrackSize; i++) {
-          routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
-          busStop = busStops.get(routeWariant.getBusOnTrack().get(i));
-          if (i == getPointOnTrackSize - 1) {
-            new BusStopMarker(view, activity, map, routeHolder.getPoints().get(routeHolder.getPoints().size() - 1).getCoords(), MapService.MARKER_BUSSTOP_END, busStop);
-          } else if (busStop.getIdCity() != 0) {
-            if (i == 0) {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
-            } else {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_ZONE);
-            }
-            trackColor = R.color.color_zone;
+          RouteHolder routeHolder = routeHolders.get(routeWariant.getPointsOnTrack().get(i));
+          if (i != getPointOnTrackSize - 1) {
+            busStop = busStops.get(routeWariant.getBusOnTrack().get(i));
           } else {
-            if (i == 0) {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
-            } else {
-              createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_CITY);
-            }
-            trackColor = R.color.color_city;
+            busStop = new BusStopMapItem(routeHolder.getPoints().get(routeHolder.getPoints().size() - 1).getCoords());
           }
-          createPolylines(routeHolder.getPoints(), trackColor);
+
+          createBusStopMarkerOnMap(busStop);
+          drawPolylines(routeHolder.getPoints(), getTrackColor(busStop.getIsCity()));
         }
         break;
       }
     }
   }
 
-  private MainMarker busPosition;
-  private MainMarker busDirection;
+  public int getTrackColor( int isCity ) {
+    if( isCity == 0 ) {
+      return R.color.color_city;
+    } else {
+      return  R.color.color_zone;
+    }
+  }
+
+  private List<BigBusMarker> bigBusMarkers = new ArrayList<>();
   private void showBusDetails(List<Vehicle> vehicles) {
     boolean isTarget = true;
     Vehicle mainVehicle = null;
-
+    BigBusMarker bigBusMarker = null;
     if (cameraStatus.get(0)) {
       isTarget = false;
-      busPosition = new BusMarker(activity, map, new LatLng(0, 0));
-      busDirection = new BusDirectionMarker(map, new LatLng(0, 0));
     }
 
-    for (Vehicle vehicle : vehicles) {
+    for (int i = 0; i < vehicles.size(); i++) {
+      Vehicle vehicle = vehicles.get(i);
       mainVehicle = vehicle;
-      if (!vehicle.getNumerLini().equals("")) {
-        busDirection.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_arrow));
-        busPosition.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(
+      if( bigBusMarkers.size() < vehicles.size() ) {
+        bigBusMarker = new BigBusMarker(activity, map);
+      } else {
+        bigBusMarker = bigBusMarkers.get(i);
+      }
+
+      if (vehicle.isSetNumerLinii()) {
+        bigBusMarker.setImageArrow(BitmapDescriptorFactory.fromResource(R.drawable.vh_arrow));
+        bigBusMarker.setImagePin(BitmapDescriptorFactory.fromBitmap(
           ImageUtils.createBusPinImage(activity, vehicle.getNumerLini())));
       } else {
-        busDirection.getMarker().setIcon(BitmapDescriptorFactory.fromResource(R.drawable.vh_clock));
-        busPosition.getMarker().setIcon(BitmapDescriptorFactory.fromBitmap(ImageUtils.createLongBusPinImage(
+        bigBusMarker.setImageArrow(BitmapDescriptorFactory.fromResource(R.drawable.vh_clock));
+        bigBusMarker.setImagePin(BitmapDescriptorFactory.fromBitmap(ImageUtils.createLongBusPinImage(
           activity,
           vehicle.getNastNumLini(),
           String.valueOf(vehicle.getIleSekDoOdjazdu()))));
       }
 
-      busPosition.getMarker().setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
-      busPosition.setObject(vehicle);
+      bigBusMarker.setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
+      bigBusMarker.setObject(vehicle);
+      bigBusMarker.setRotation(vehicle.getWektor());
 
-      busDirection.getMarker().setRotation(vehicle.getWektor());
-      busDirection.getMarker().setPosition(new LatLng(vehicle.getSzerokosc(), vehicle.getDlugosc()));
-
-      if (busPosition.isOpen()) {
-        busPosition.getMarker().showInfoWindow();
-      }
+      bigBusMarkers.add(bigBusMarker);
+      bigBusMarker.openIfWasOpened();
     }
 
     if (cameraStatus.get(0)) {
@@ -243,61 +243,44 @@ public class MapService {
 
   public void setSearchTrack(List<SearchResultPoint> searchResultPoints) {
     int searchResultPointsSize = searchResultPoints.size();
-    SearchResultPoint searchResultPoint;
     SearchResultPoint prevSearchResultPoint = null;
     SearchResultPoint nextSearchResultPoint = null;
-    List<RoutePoint> routePoints;
 
-    BusStop busStop;
     for (int i = 0; i < searchResultPointsSize; i++) {
-      searchResultPoint = searchResultPoints.get(i);
-      routePoints = searchResultPoint.getPoints();
-      busStop = new BusStop(searchResultPoint);
+      SearchResultPoint searchResultPoint = searchResultPoints.get(i);
+      List<RoutePoint> routePoints = searchResultPoint.getPoints();
+      BusStopMapItem busStop = new BusStopMapItem(searchResultPoint);
 
       if (i != 0) {
         prevSearchResultPoint = searchResultPoints.get(i - 1);
       }
-      if (i != searchResultPointsSize - 1) {
+      if (i < searchResultPointsSize - 1) {
         nextSearchResultPoint = searchResultPoints.get(i + 1);
       }
 
       if (searchResultPoint.getBusStopId() == 0) {
         if (i == 0) {
-          createSinglePolyline(searchResultPoint.getCoords(), searchResultPoints.get(i + 1).getCoords(), R.color.error);
+          drawSinglePolyline(searchResultPoint.getCoords(), searchResultPoints.get(i + 1).getCoords(), R.color.error);
         } else {
-          createSinglePolyline(searchResultPoint.getCoords(), searchResultPoints.get(i - 1).getCoords(), R.color.error);
+          drawSinglePolyline(searchResultPoint.getCoords(), searchResultPoints.get(i - 1).getCoords(), R.color.error);
         }
       }
+      drawSinglePolyline(new LatLng(searchResultPoint.getLng(), searchResultPoint.getLat()), new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()), R.color.error);
 
-      if (i == 0) {
-        createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_START);
-      } else if (i == searchResultPoints.size() - 1) {
-        createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_END);
-      } else {
-        createBusStopMarkerOnMap(busStop, MapService.MARKER_BUSSTOP_TRACK);
-        if (searchResultPoint.getZero1() != 0) {
-          if (i < searchResultPointsSize - 1 && !nextSearchResultPoint.isChangeBus()) {
-            createPolylines(routePoints, R.color.color_zone);
-          }
-        } else {
-          if (i < searchResultPointsSize - 1 && !nextSearchResultPoint.isChangeBus()) {
-            createPolylines(routePoints, R.color.color_city);
-          }
-        }
+      createBusStopMarkerOnMap(busStop);
+      if (i < searchResultPointsSize - 1 && !nextSearchResultPoint.isChangeBus()){
+        drawPolylines(routePoints, busStop.getId());
       }
 
       if (searchResultPoint.isChangeBus() && searchResultPoint.getBusStopId() != 0) {
-
         new BusChangeMarker(activity, map, new LatLng(searchResultPoint.getLng(), searchResultPoint.getLat()), searchResultPoint.getBusLine());
-        new WalkMarker(activity, map,  new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()));
-
-        createSinglePolyline(new LatLng(searchResultPoint.getLng(), searchResultPoint.getLat()), new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()), R.color.error);
+        new WalkMarker(activity, map, new LatLng(prevSearchResultPoint.getLng(), prevSearchResultPoint.getLat()));
       }
     }
   }
 
-  public void createBusStopMarkerOnMap(BusStop busStop, int type) {
-    new BusStopMarker(view, activity, map, new LatLng(busStop.getLongitude(), busStop.getLatitude()), type, busStop);
+  public void createBusStopMarkerOnMap(BusStopMapItem busStop) {
+    new BusStopMarker(view, activity, map, busStop);
   }
 
   //STATUS_CURRENT_POSITION

@@ -4,7 +4,7 @@ import com.tickaroo.tikxml.annotation.Attribute;
 import com.tickaroo.tikxml.annotation.Xml;
 
 @Xml(name = "D")
-public class Departue {
+public class RemoteDepartue {
   @Attribute(name = "i")
   int id;
   @Attribute(name = "di")
@@ -32,10 +32,10 @@ public class Departue {
   @Attribute(name = "vn")
   String vn;
 
-  public Departue() {
+  public RemoteDepartue() {
   }
 
-  public Departue(int id, int wariantId, int busId, int t, int busLine, String busDirection, String dd, String p, String kn, int remainingTime, int m, String time, String vn) {
+  public RemoteDepartue(int id, int wariantId, int busId, int t, int busLine, String busDirection, String dd, String p, String kn, int remainingTime, int m, String time, String vn) {
     this.id = id;
     this.wariantId = wariantId;
     this.busId = busId;

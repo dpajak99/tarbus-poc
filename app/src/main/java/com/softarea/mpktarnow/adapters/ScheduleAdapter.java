@@ -16,7 +16,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
-import com.softarea.mpktarnow.model.BusStop;
+import com.softarea.mpktarnow.model.db.BusStopListItem;
 import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ import java.util.List;
 
 public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHolder> implements Filterable {
 
-  private List<BusStop> busStops = new ArrayList<>();
-  private List<BusStop> filteredData = new ArrayList<>();
+  private List<BusStopListItem> busStops = new ArrayList<>();
+  private List<BusStopListItem> filteredData = new ArrayList<>();
   private Context context;
   private FragmentActivity activity;
 
@@ -39,12 +39,11 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
       super(itemView);
       id = itemView.findViewById(R.id.schedule_bus_stop_id);
       name = itemView.findViewById(R.id.schedule_bus_stop_name);
-      admin = itemView.findViewById(R.id.admin);
       busStop = itemView.findViewById(R.id.layout_bus_stop);
     }
   }
 
-  public void updateArticles(List<BusStop> busStops) {
+  public void updateArticles(List<BusStopListItem> busStops) {
     this.busStops.addAll(busStops);
     this.filteredData.addAll(busStops);
     this.notifyDataSetChanged();
@@ -66,16 +65,17 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
 
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
-    BusStop busStop= filteredData.get(position);
+    BusStopListItem busStop= filteredData.get(position);
     holder.id.setText(String.valueOf(busStop.getId()));
     holder.name.setText(busStop.getName());
-    holder.admin.setText(busStop.toString());
+
 
     holder.busStop.setOnClickListener(view -> {
       Bundle result = new Bundle();
       result.putInt("id", busStop.getId());
+      result.putString("BUS_STOP_NAME", busStop.getName());
 
-      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_bus_stop_details, result);
+      Navigation.findNavController(holder.itemView).navigate(R.id.navigation_slide_bus_stop, result);
     });
   }
 
@@ -91,7 +91,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
   private Filter exampleFilter = new Filter() {
     @Override
     protected FilterResults performFiltering(CharSequence constraint) {
-      List<BusStop> filteredList = new ArrayList<>();
+      List<BusStopListItem> filteredList = new ArrayList<>();
 
       String filterPattern = StringUtils.normalize(constraint.toString().toLowerCase()).trim();
       String[] arrOfStr = filterPattern.split(" ", 5);
@@ -100,7 +100,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
         filteredList.addAll(busStops);
       } else {
 
-        for (BusStop item : busStops) {
+        for (BusStopListItem item : busStops) {
           boolean status = false;
           for (String pattern : arrOfStr) {
             if (StringUtils.normalize(item.getName().toLowerCase()).contains(pattern)) {
@@ -122,7 +122,7 @@ public class ScheduleAdapter extends RecyclerView.Adapter<ScheduleAdapter.ViewHo
     }
     @Override
     protected void publishResults(CharSequence constraint, FilterResults results) {
-      filteredData = (ArrayList<BusStop>) results.values;
+      filteredData = (ArrayList<BusStopListItem>) results.values;
       notifyDataSetChanged();
     }
   };

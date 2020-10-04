@@ -15,7 +15,7 @@ public class Departues {
   @Attribute(name = "i")
   int busStopId;
   @Element(name = "D")
-  List<Departue> departueList;
+  List<RemoteDepartue> departueList;
 
   public String getTime() {
     return time;
@@ -25,7 +25,7 @@ public class Departues {
     return busStopId;
   }
 
-  public List<Departue> getDepartueList() {
+  public List<RemoteDepartue> getDepartueList() {
     return departueList;
   }
 

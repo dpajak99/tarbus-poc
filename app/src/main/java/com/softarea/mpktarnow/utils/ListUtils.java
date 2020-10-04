@@ -1,17 +1,17 @@
 package com.softarea.mpktarnow.utils;
 
-import com.softarea.mpktarnow.data.remote.model.Departue;
+import com.softarea.mpktarnow.model.DepartueItem;
 import com.softarea.mpktarnow.model.NearBusStop;
 
 import java.util.Comparator;
 
 public class ListUtils {
-  public static class Sortbyroll implements Comparator<Departue> {
+  public static class Sortbyroll implements Comparator<DepartueItem> {
     // Used for sorting in ascending order of
     // roll number
-    public int compare(Departue a, Departue b)
+    public int compare(DepartueItem a, DepartueItem b)
     {
-      return a.getRemainingTime() - b.getRemainingTime();
+      return a.getDepartueTime() - b.getDepartueTime();
     }
   }
 
