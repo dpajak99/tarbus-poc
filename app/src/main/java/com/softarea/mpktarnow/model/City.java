@@ -5,6 +5,8 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import com.softarea.mpktarnow.model.db.BusStopListItem;
+
 import java.util.List;
 
 @Entity(tableName = "City")
@@ -14,7 +16,7 @@ public class City {
   @ColumnInfo(name = "name")
   String name;
   @Ignore
-  List<BusStop> busStops;
+  List<BusStopListItem> busStops;
 
   public int getId() {
     return id;
@@ -24,11 +26,11 @@ public class City {
     return name;
   }
 
-  public List<BusStop> getBusStops() {
+  public List<BusStopListItem> getBusStops() {
     return busStops;
   }
 
-  public City(int id, String name, List<BusStop> busStops) {
+  public City(int id, String name, List<BusStopListItem> busStops) {
     this.id = id;
     this.name = name;
     this.busStops = busStops;

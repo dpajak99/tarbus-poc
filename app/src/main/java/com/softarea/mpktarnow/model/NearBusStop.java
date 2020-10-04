@@ -1,10 +1,12 @@
 package com.softarea.mpktarnow.model;
 
+import com.softarea.mpktarnow.model.db.BusStopListItem;
+
 public class NearBusStop {
   private int meters;
-  private BusStop busStop;
+  private BusStopListItem busStop;
 
-  public NearBusStop(int meters, BusStop busStop) {
+  public NearBusStop(int meters, BusStopListItem busStop) {
     this.meters = meters;
     this.busStop = busStop;
   }
@@ -14,7 +16,7 @@ public class NearBusStop {
   }
 
 
-  public BusStop getBusStop() {
+  public BusStopListItem getBusStop() {
     return busStop;
   }
 

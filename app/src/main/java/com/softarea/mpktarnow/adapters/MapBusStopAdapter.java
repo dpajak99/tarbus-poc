@@ -11,17 +11,20 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
+<<<<<<< HEAD
 import com.softarea.mpktarnow.data.remote.model.Departue;
 import com.softarea.mpktarnow.utils.ListUtils;
+=======
+import com.softarea.mpktarnow.data.remote.model.RemoteDepartue;
+>>>>>>> helpme
 import com.softarea.mpktarnow.utils.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MapBusStopAdapter extends RecyclerView.Adapter<MapBusStopAdapter.ViewHolder> {
 
-  private List<Departue> departues= new ArrayList<>();;
+  private List<RemoteDepartue> remoteDepartues = new ArrayList<>();;
 
   FragmentActivity activity;
 
@@ -38,14 +41,14 @@ public class MapBusStopAdapter extends RecyclerView.Adapter<MapBusStopAdapter.Vi
     }
   }
 
-  public void update(List<Departue> departues) {
-    Collections.sort(departues, new ListUtils.Sortbyroll());
-    this.departues.addAll(departues);
+  public void update(List<RemoteDepartue> remoteDepartues) {
+    //Collections.sort(remoteDepartues, new ListUtils.Sortbyroll());
+    this.remoteDepartues.addAll(remoteDepartues);
     this.notifyDataSetChanged();
   }
 
   public void clear() {
-    this.departues.clear();
+    this.remoteDepartues.clear();
     this.notifyDataSetChanged();
   }
 
@@ -65,15 +68,15 @@ public class MapBusStopAdapter extends RecyclerView.Adapter<MapBusStopAdapter.Vi
 
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
-    Departue departue = departues.get(position);
+    RemoteDepartue remoteDepartue = remoteDepartues.get(position);
 
-    holder.busNumber.setText(String.valueOf(departue.getBusLine()));
+    holder.busNumber.setText(String.valueOf(remoteDepartue.getBusLine()));
 //    holder.busDirection.setText(departue.getBusDirection());
-    holder.busDepartueTime.setText(StringUtils.replaceHTML(departue.getTime()));
+    holder.busDepartueTime.setText(StringUtils.replaceHTML(remoteDepartue.getTime()));
   }
 
   @Override
   public int getItemCount() {
-    return departues.size();
+    return remoteDepartues.size();
   }
 }

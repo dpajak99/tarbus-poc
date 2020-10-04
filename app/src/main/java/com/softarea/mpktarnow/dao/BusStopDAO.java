@@ -1,9 +1,13 @@
 package com.softarea.mpktarnow.dao;
 
 import com.google.gson.JsonArray;
-import com.softarea.mpktarnow.model.BusStop;
-import com.softarea.mpktarnow.model.RoutePoint;
 import com.softarea.mpktarnow.data.remote.model.SearchConnectionCallback;
+import com.softarea.mpktarnow.model.BusStopMapItem;
+import com.softarea.mpktarnow.model.RoutePoint;
+<<<<<<< HEAD
+import com.softarea.mpktarnow.data.remote.model.SearchConnectionCallback;
+=======
+>>>>>>> helpme
 import com.softarea.mpktarnow.model.SearchResult;
 import com.softarea.mpktarnow.model.SearchResultPoint;
 import com.softarea.mpktarnow.utils.StringUtils;
@@ -16,17 +20,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BusStopDAO {
-  public static List<BusStop> parseRouteBusStops(JsonArray array) {
-    List<BusStop> busStops = new ArrayList<>();
+  public static List<BusStopMapItem> parseRouteBusStops(JsonArray array) {
+    List<BusStopMapItem> busStops = new ArrayList<>();
     for (int i = 0; i < array.size(); i++) {
       JsonArray busArray = array.get(i).getAsJsonArray();
-      BusStop busStop = new BusStop(
-        busArray.get(0).getAsInt(),
-        busArray.get(1).getAsString(),
-        busArray.get(2).getAsString(),
-        busArray.get(3).getAsDouble(),
-        busArray.get(4).getAsDouble(),
-        busArray.get(5).getAsInt()
+      BusStopMapItem busStop = new BusStopMapItem(
+        busArray.get(0).getAsInt(),    //id
+        busArray.get(1).getAsString(), //isCity
+        busArray.get(4).getAsDouble(), //latitude
+        busArray.get(3).getAsDouble(), //longitude
+        busArray.get(5).getAsInt()     //name
       );
       busStops.add(busStop);
     }

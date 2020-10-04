@@ -13,9 +13,14 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.softarea.mpktarnow.R;
+<<<<<<< HEAD
 import com.softarea.mpktarnow.data.remote.model.Departue;
+=======
+import com.softarea.mpktarnow.model.DepartueItem;
+>>>>>>> helpme
 import com.softarea.mpktarnow.utils.ListUtils;
 import com.softarea.mpktarnow.utils.StringUtils;
+import com.softarea.mpktarnow.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +28,7 @@ import java.util.List;
 
 public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
 
-  private List<Departue> departues= new ArrayList<>();
+  private List<DepartueItem> remoteDatabaseDepartues = new ArrayList<>();
 
   public static class ViewHolder extends RecyclerView.ViewHolder {
     public TextView busNumber;
@@ -40,14 +45,15 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
     }
   }
 
-  public void update(List<Departue> departues) {
-    Collections.sort(departues, new ListUtils.Sortbyroll());
-    this.departues.addAll(departues);
+  public void update(List<DepartueItem> remoteDatabaseDepartues) {
+    this.remoteDatabaseDepartues.clear();
+    Collections.sort(remoteDatabaseDepartues, new ListUtils.Sortbyroll());
+    this.remoteDatabaseDepartues.addAll(remoteDatabaseDepartues);
     this.notifyDataSetChanged();
   }
 
   public void clear() {
-    this.departues.clear();
+    this.remoteDatabaseDepartues.clear();
     this.notifyDataSetChanged();
   }
 
@@ -66,23 +72,34 @@ public class BusAdapter extends RecyclerView.Adapter<BusAdapter.ViewHolder> {
 
   @Override
   public void onBindViewHolder(ViewHolder holder, int position) {
-    Departue departue = departues.get(position);
+    DepartueItem departueItem = remoteDatabaseDepartues.get(position);
 
-    holder.busNumber.setText(departue.getBusLine() + "\n" + departue.getBusId());
-    holder.busDirection.setText(departue.getBusDirection());
-    holder.busDepartueTime.setText(StringUtils.replaceHTML(departue.getTime()));
+    holder.busNumber.setText(departueItem.getBusLine() + "\n" + departueItem.getBusId());
+    holder.busDirection.setText(departueItem.getDestination());
+    if( departueItem.getLiveTime().length() != 0 ) {
+      holder.busDepartueTime.setText(StringUtils.replaceHTML(departueItem.getLiveTime()));
+    } else {
+      holder.busDepartueTime.setText(TimeUtils.min2HHMM(departueItem.getDepartueTime()));
+    }
+
     holder.contentHolder.setOnClickListener(view -> {
       Bundle result = new Bundle();
+<<<<<<< HEAD
       result.putInt("busLine", departue.getBusLine());
       result.putInt("busId", departue.getBusId());
       result.putInt("wariantId", departue.getWariantId());
       result.putString("routeId", String.valueOf(departue.getId()));
+=======
+      result.putInt("busLine", departueItem.getBusLine());
+      result.putInt("busId", departueItem.getBusId());
+      result.putInt("wariantId", departueItem.getWariantId());
+>>>>>>> helpme
       Navigation.findNavController(holder.itemView).navigate(R.id.navigation_bus_details_map, result);
     });
   }
 
   @Override
   public int getItemCount() {
-    return departues.size();
+    return remoteDatabaseDepartues.size();
   }
 }

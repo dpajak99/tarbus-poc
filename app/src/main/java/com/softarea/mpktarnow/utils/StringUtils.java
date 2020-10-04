@@ -1,8 +1,12 @@
 package com.softarea.mpktarnow.utils;
 
+import android.util.Log;
+
 import java.text.Normalizer;
+import java.util.List;
 
 public class StringUtils {
+  public static final char NEW_LINE = '\n';
   public static String normalize(String base) {
     return Normalizer.normalize(base,
       Normalizer.Form.NFD)
@@ -37,13 +41,43 @@ public class StringUtils {
     return sb.toString();
   }
 
-  public static String deleteWhiteSpaces( String text ) {
+  public static String deleteWhiteSpaces(String text) {
     StringBuilder result = new StringBuilder("");
-    for( int i = 0; i < text.length(); i++ ) {
-      if( text.charAt(i) != ' ' ) {
+    for (int i = 0; i < text.length(); i++) {
+      if (text.charAt(i) != ' ') {
         result.append(text.charAt(i));
       }
     }
     return result.toString();
+  }
+
+  public static String getFirstLetterFromWordsSeperatedBySemicolon(String text) {
+    StringBuilder stringResult = new StringBuilder();
+    String[] seperatedList = text.split(",");
+    for (String s : seperatedList) {
+      if (s.length() != 0) {
+        stringResult.append(s.charAt(0));
+      }
+    }
+    return stringResult.toString();
+  }
+
+  public static boolean isStringAddedToStringTab(String stringToCheck, List<String> tabToCheck) {
+    for (String s : tabToCheck) {
+      if (s.equals(stringToCheck)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static StringBuilder arrayToString(List<String> array ) {
+    StringBuilder routeVariants = new StringBuilder();
+    for( int i = 0; i < array.size(); i++) {
+      routeVariants.append(array.get(i));
+      Log.i("TEST", "array: " + array.get(i));
+      routeVariants.append(StringUtils.NEW_LINE);
+    }
+    return routeVariants;
   }
 }
