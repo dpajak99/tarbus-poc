@@ -1,4 +1,4 @@
-# bus-tarnow abandoned
+# bus-tarnow (Abandoned)
 # Rozwój tej aplikacji został porzucony. Aktualnie pracuję nad jej nową wersją, gdzie próbuję zaimplementować ją bardziej obiektowo wykorzystując do tego biblioteke RxJava, RxAndroid
 
 Aplikacja BusTarnow została stworzona w ramach praktyk w firmie SOFTAREA. Pokazuje ona rzeczywiste czasy odjazdów autobusów z przystanku autobusowego, wykorzystując api Komunikacji Miejskiej w Tarnowie. Dodatkowo możemy sprawdzić rozkład jazdy dla danego przystanku i danej linii w trybie offline, wyświetlić listę najbiższych przystankow oraz wyszukać połączenie autobusowe w trybie online.
