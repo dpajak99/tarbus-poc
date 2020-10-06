@@ -5,5 +5,5 @@ Aplikacja BusTarnow została stworzona w ramach praktyk w firmie SOFTAREA. Pokaz
 
 Aktualny postęp prac nad aplikacją wraz ze screenschotami oraz planowane nowości można zobaczyć na mojej tablicy Trello
 https://trello.com/b/IrPblqGh
-Oraz na youtubie
+oraz na youtubie
 https://youtu.be/jYNwePmvq98
