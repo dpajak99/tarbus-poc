@@ -1,9 +1,5 @@
-# bus-tarnow (Abandoned)
-# Rozwój tej aplikacji został porzucony. Aktualnie pracuję nad jej nową wersją, gdzie próbuję zaimplementować ją bardziej obiektowo wykorzystując do tego biblioteke RxJava, RxAndroid
+# tarbus-poc - Softarea internship project (Abandoned)
+## The development of this application has been abandoned. I am currently working on a new version of it, where I am trying to implement it more object-oriented using the RxJava library, RxAndroid
 
-Aplikacja BusTarnow została stworzona w ramach praktyk w firmie SOFTAREA. Pokazuje ona rzeczywiste czasy odjazdów autobusów z przystanku autobusowego, wykorzystując api Komunikacji Miejskiej w Tarnowie. Dodatkowo możemy sprawdzić rozkład jazdy dla danego przystanku i danej linii w trybie offline, wyświetlić listę najbiższych przystankow oraz wyszukać połączenie autobusowe w trybie online.
+The tarbus-poc application was developed as part of an internship at SOFTAREA. It shows the actual departure times of buses from a bus stop, using the api of Tarnów Public Transport. In addition, we can check the timetable for a given bus stop and a given line offline, display a list of the nearest bus stops and search for a bus connection online.
 
-Aktualny postęp prac nad aplikacją wraz ze screenschotami oraz planowane nowości można zobaczyć na mojej tablicy Trello
-https://trello.com/b/IrPblqGh
-oraz na youtubie
-https://youtu.be/jYNwePmvq98
